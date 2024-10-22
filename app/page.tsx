@@ -55,7 +55,7 @@ export default function CloudFalconDevLanding() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-[url('/img/jpg/Concrete.jpg')] bg-cover bg-center">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-r from-slate-500 to-gray-400">
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
