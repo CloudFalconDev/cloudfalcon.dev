@@ -263,12 +263,12 @@ export default function CloudFalconDevLanding() {
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                   Ready to Optimize Your Cloud?
                 </h2>
-                <p className="mx-auto max-w-[600px] text-blue-100 md:text-xl">
+                <p className="mx-auto max-w-[600px] text-blue-100 md:text-l">
                   Get in touch with our experts and start your cloud
                   optimization journey today.
                 </p>
               </div>
-              <div className="w-full max-w-sm space-y-2">
+              <div className="w-full max-w-sm space-y-4">
                 <form className="flex space-x-2">
                   <Input
                     className="max-w-lg flex-1 bg-white text-gray-900"
@@ -279,6 +279,15 @@ export default function CloudFalconDevLanding() {
                     Contact Us
                   </Button>
                 </form>
+                <div className="flex items-center justify-center space-x-2">
+                  <p className="text-l text-blue-100">Or call us:</p>
+                  <a
+                    href="tel:+96890131817"
+                    className="text-sm text-blue-100 hover:underline"
+                  >
+                    +968 90131817
+                  </a>
+                </div>
                 <p className="text-xs text-blue-100">
                   We respect your privacy.
                 </p>
@@ -289,7 +298,7 @@ export default function CloudFalconDevLanding() {
       </main>
       <footer className="w-full max-w-6xl mx-auto flex flex-col gap-2 sm:flex-row py-6 shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500">
-          © 2015 - {new Date().getFullYear()} CloudFalconDev.
+          © 2015 - {new Date().getFullYear()} CloudFalconDev -
         </p>
         <p className="text-xs text-gray-500">
           🇴🇲 Owned by SAHAB Investments Solutions, a S.P.C registered in Oman
