@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import React from "react";
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
+import CalendlyWidget from "@/components/CalendlyWidget";
 
 function GeometricBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +65,13 @@ function GeometricBackground() {
     scene.add(light);
     scene.add(new THREE.AmbientLight("#1e293b", 0.5));
 
-    camera.position.z = 3;
+    // Camera setup
+    camera.position.z = 1; // Adjust depth
+    camera.position.y = 0; // Center vertically
+    camera.position.x = 0; // Center horizontally
+
+    // Update mesh position
+    mesh.position.set(0, 0, 0); // Center the mesh
 
     // Animation
     const animate = () => {
@@ -93,7 +101,39 @@ function GeometricBackground() {
     };
   }, []);
 
-  return <div ref={containerRef} className="absolute inset-0 z-0" />;
+  // Add resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const camera = cameraRef.current;
+      const renderer = rendererRef.current;
+
+      if (camera && renderer) {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Update container styles
+  return (
+    <div
+      ref={containerRef}
+      className="absolute inset-0 z-0 flex items-center justify-center"
+      style={{
+        pointerEvents: "none",
+        height: "100vh",
+        width: "100vw",
+        overflow: "hidden",
+      }}
+    />
+  );
 }
 
 export default function CloudFalconDevLanding() {
@@ -120,24 +160,6 @@ export default function CloudFalconDevLanding() {
             href="#services"
           >
             Services
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#cloud-platforms"
-          >
-            Cloud Platforms
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#cloud-tools"
-          >
-            Cloud Tools
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#why-choose-us"
-          >
-            Why Choose Us
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -767,7 +789,16 @@ export default function CloudFalconDevLanding() {
             </div>
           </div>
         </section>
+        {/* <section
+          id="calendly"
+          className="w-full py-4 md:py-4 lg:py-4 bg-white-600 text-white"
+        >
+          <div className="calendly">
+            <InlineWidget url="https://calendly.com/cloudfalcon" />
+          </div>
+        </section> */}
       </main>
+      <CalendlyWidget />
       <footer className="w-full py-6 bg-gray-50">
         <div className="container px-4 md:px-6 max-w-6xl mx-auto">
           <div className="flex justify-center items-center space-x-6">
@@ -810,21 +841,38 @@ export default function CloudFalconDevLanding() {
         </div>
       </footer>
       <footer className="w-full max-w-6xl mx-auto flex flex-col gap-2 sm:flex-row py-6 shrink-0 items-center px-4 md:px-6 border-t">
-        <p className="text-xs text-gray-500">
-          © 2015 - {new Date().getFullYear()} CloudFalconDev -
-        </p>
-        <p className="text-xs text-gray-500">
-          🇴🇲 Owned by SAHAB Investments Solutions, a S.P.C registered in Oman
-          under the CR number 1571037.
-        </p>
-        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Terms of Service
-          </Link>
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
-            Privacy
-          </Link>
-        </nav>
+        <div className="flex flex-col gap-2 w-full">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-gray-500">
+              © 2015 - {new Date().getFullYear()} CloudFalconDev{" "}
+            </p>
+            <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+              <Link
+                className="text-xs hover:underline underline-offset-4"
+                href="#"
+              >
+                Terms of Service
+              </Link>
+              <Link
+                className="text-xs hover:underline underline-offset-4"
+                href="#"
+              >
+                Privacy
+              </Link>
+            </nav>
+          </div>
+
+          <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-4 text-xs text-gray-500">
+            <span>🇺🇸 New Jersey, USA</span>
+            <span className="hidden sm:inline">•</span>
+            <span>🇪🇬 Cairo, Egypt</span>
+            <span className="hidden sm:inline">•</span>
+            <span>
+              🇴🇲 Muscat, Oman - Owned by <strong>SAHAB</strong> Investments
+              Solutions, a S.P.C registered in Oman under the CR number 1571037.
+            </span>
+          </div>
+        </div>
       </footer>
     </div>
   );
