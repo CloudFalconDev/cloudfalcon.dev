@@ -8,6 +8,8 @@ import {
   Zap,
   CheckCircle,
   GraduationCap,
+  Users,
+  FolderGit2,
   Twitter,
   Linkedin,
   Github,
@@ -15,6 +17,84 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import * as THREE from "three";
+import { useEffect, useRef } from "react";
+
+function GeometricBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene>();
+  const cameraRef = useRef<THREE.PerspectiveCamera>();
+  const rendererRef = useRef<THREE.WebGLRenderer>();
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+
+    sceneRef.current = scene;
+    cameraRef.current = camera;
+    rendererRef.current = renderer;
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    containerRef.current.appendChild(renderer.domElement);
+
+    // Create geometric shapes
+    const geometry = new THREE.IcosahedronGeometry(2, 1);
+    const material = new THREE.MeshPhongMaterial({
+      color: "#3b82f6",
+      wireframe: true,
+      transparent: true,
+      opacity: 0.9,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    // Add lights
+    const light = new THREE.DirectionalLight("#60a5fa", 1);
+    light.position.set(0, 0, 2);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight("#1e293b", 0.5));
+
+    camera.position.z = 3;
+
+    // Animation
+    const animate = () => {
+      requestAnimationFrame(animate);
+      mesh.rotation.x += 0.001;
+      mesh.rotation.y += 0.002;
+      renderer.render(scene, camera);
+    };
+
+    // Mouse interaction
+    const onMouseMove = (event: MouseEvent) => {
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
+      mesh.rotation.x = y * 0.3;
+      mesh.rotation.y = x * 0.3;
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    animate();
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      if (containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
+    };
+  }, []);
+
+  return <div ref={containerRef} className="absolute inset-0 z-0" />;
+}
 
 export default function CloudFalconDevLanding() {
   const handleContactClick = () => {
@@ -74,14 +154,9 @@ export default function CloudFalconDevLanding() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
-          <div
-            className="absolute inset-0 w-full h-full z-0"
-            style={{
-              backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHZpZXdCb3g9JzAgMCA4MCA4MCc+CiAgPGRlZnM+CiAgICA8cGF0dGVybiBpZD0ncGF0dGVybicgcGF0dGVyblVuaXRzPSd1c2VyU3BhY2VPblVzZScgd2lkdGg9JzgwJyBoZWlnaHQ9JzgwJyB2aWV3Qm94PScwIDAgNDAgNDAnPgogICAgICA8cmVjdCB3aWR0aD0nNDAnIGhlaWdodD0nNDAnIGZpbGw9JyMxZTI5M2InLz4KICAgICAgPHBhdGggZD0nTTAgMGw0MCA0MEgwVjB6bTQwIDBMMCA0MGg0MFYweicgZmlsbC1vcGFjaXR5PScwLjEnIGZpbGw9JyMzYjgyZjYnLz4KICAgICAgPHBhdGggZD0nTTIwIDBsMjAgMjBMMjAgNDBMMCA4MCcgZmlsbC1vcGFjaXR5PScwLjInIGZpbGw9JyM2MGE1ZmEnLz4KICAgIDwvcGF0dGVybj4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsbD0ndXJsKCNwYXR0ZXJuKScvPgo8L3N2Zz4=")`,
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-gray-900/80" />
+        <section className="w-full py-8 md:py-16 lg:py-24 xl:py-32 relative overflow-hidden">
+          <GeometricBackground />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-gray-900/90" />
           <div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
@@ -99,7 +174,7 @@ export default function CloudFalconDevLanding() {
         </section>
         <section id="services" className="w-full py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
               Our Services
             </h2>
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -142,7 +217,7 @@ export default function CloudFalconDevLanding() {
           className="w-full py-12 md:py-24 lg:py-32 bg-white"
         >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
               Cloud Platforms We Excel In
             </h2>
             <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
@@ -197,7 +272,7 @@ export default function CloudFalconDevLanding() {
           className="w-full py-12 md:py-24 lg:py-32 bg-gray-50"
         >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
               IaC Tools We Use
             </h2>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -207,46 +282,191 @@ export default function CloudFalconDevLanding() {
                   image: "png/terraform.png",
                   description:
                     "Infrastructure as Code for multi-cloud environments",
+                  link: "https://www.terraform.io/",
                 },
                 {
                   name: "Pulumi",
                   image: "png/Pulumi.png",
                   description:
                     "Modern Infrastructure as Code using your favorite programming languages",
+                  link: "https://www.pulumi.com/",
                 },
                 {
                   name: "AWS CDK",
                   image: "png/cdk.png",
                   description:
                     "Define cloud infrastructure using familiar programming languages",
+                  link: "https://aws.amazon.com/cdk/",
                 },
                 {
                   name: "Crossplane",
                   image: "png/crossplane.png",
                   description: "Open source multi-cloud control plane",
+                  link: "https://www.crossplane.io/",
                 },
-                // {
-                //   name: "Docker",
-                //   image: "/img/Docker.svg",
-                //   description:
-                //     "Containerization platform for consistent application deployment",
-                // },
               ].map((tool, index) => (
                 <div
                   key={index}
                   className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm"
                 >
-                  <Image
-                    src={`/img/${tool.image}`}
-                    alt={tool.name}
-                    width={200}
-                    height={50}
-                    className="mb-4"
-                  />
-                  <h3 className="text-xl font-bold mb-2">{tool.name}</h3>
-                  <p className="text-gray-500">{tool.description}</p>
+                  <Link
+                    href={tool.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex flex-col items-center text-center hover:opacity-80 transition-opacity"
+                  >
+                    <Image
+                      src={`/img/${tool.image}`}
+                      alt={tool.name}
+                      width={200}
+                      height={50}
+                      className="mb-4"
+                    />
+                    <h3 className="text-xl font-bold mb-2">{tool.name}</h3>
+                    <p className="text-gray-500">{tool.description}</p>
+                  </Link>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+        <section
+          id="services-automation"
+          className="w-full py-12 md:py-24 lg:py-32 bg-white"
+        >
+          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
+              Services We Automate
+            </h2>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Datadog */}
+              <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+                <Link
+                  href="https://www.datadoghq.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <Image
+                    src="/img/png/datadog.png"
+                    alt="Datadog"
+                    width={100}
+                    height={600}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Datadog</h3>
+                  <p className="text-gray-500">
+                    Automated monitoring, metrics collection, and alerting setup
+                    for comprehensive observability
+                  </p>
+                </Link>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+                <Link
+                  href="https://www.vanta.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <Image
+                    src="/img/png/vanta.png"
+                    alt="Vanta"
+                    width={600}
+                    height={600}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Vanta</h3>
+                  <p className="text-gray-500">
+                    Streamlined security compliance automation and continuous
+                    monitoring for SOC 2, ISO 27001, and more
+                  </p>
+                </Link>
+              </div>
+
+              {/* Twingate */}
+              <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+                <Link
+                  href="https://www.twingate.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <Image
+                    src="/img/png/twingate.png"
+                    alt="Twingate"
+                    width={600}
+                    height={600}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Twingate</h3>
+                  <p className="text-gray-500">
+                    Zero-trust network access automation for secure resource
+                    connectivity and access management
+                  </p>
+                </Link>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm">
+                <Link
+                  href="https://github.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <Image
+                    src="/img/png/github.png"
+                    alt="Github"
+                    width={600}
+                    height={600}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Github</h3>
+                  <p className="text-gray-500">
+                    Automated repository management, CI/CD pipelines, and
+                    security controls.
+                  </p>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="w-full py-12 bg-white/5 backdrop-blur-sm">
+          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+              {/* Clients Stats */}
+              <div className="p-6 rounded-lg bg-white/10 backdrop-blur">
+                <div className="text-4xl font-bold text-blue-500 mb-2">
+                  <Link className="flex items-center justify-center" href="#">
+                    <Users className="h-6 w-6 text-blue-500" />
+                    <span className="ml-2 text-2xl font-bold text-blue-500">
+                      25+
+                    </span>
+                  </Link>
+                </div>
+                <h3 className="text-xl font-semibold text-blue-500 mb-2">
+                  Global Clients
+                </h3>
+                <p className="text-gray-700">
+                  From innovative startups to established enterprises, serving
+                  clients worldwide
+                </p>
+              </div>
+
+              {/* Projects Stats */}
+              <div className="p-6 rounded-lg bg-white/10 backdrop-blur">
+                <Link className="flex items-center justify-center" href="#">
+                  <FolderGit2 className="h-6 w-6 text-blue-500" />
+                  <span className="ml-2 text-2xl font-bold text-blue-500">
+                    50+
+                  </span>
+                </Link>
+                <h3 className="text-xl font-semibold text-blue-500 mb-2">
+                  Projects Delivered
+                </h3>
+                <p className="text-gray-700">
+                  Successfully completed projects ranging from simple to complex
+                  implementations
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -255,7 +475,7 @@ export default function CloudFalconDevLanding() {
           className="w-full py-12 md:py-24 lg:py-32 bg-white"
         >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
               Why Choose CloudFalconDev
             </h2>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -276,11 +496,116 @@ export default function CloudFalconDevLanding() {
           </div>
         </section>
         <section
+          id="how-we-work"
+          className="w-full py-12 md:py-24 lg:py-32 bg-gray-50"
+        >
+          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
+              How CloudFalconDev Works
+            </h2>
+            <h4 className="text-2xl font-bold text-center mb-8 text-gray-700">
+              You will be invited to our streamlined process to ensures a
+              seamless experience!
+            </h4>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Slack */}
+              <Link
+                href="https://slack.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
+                  <Image
+                    src="/img/png/slack.png"
+                    alt="Slack"
+                    width={64}
+                    height={64}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Communication</h3>
+                  <p className="text-gray-500">
+                    Direct access via <strong>Slack</strong> for real-time
+                    communication and troubleshooting
+                  </p>
+                </div>
+              </Link>
+
+              {/* Linear */}
+              <Link
+                href="https://linear.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
+                  <Image
+                    src="/img/png/linear.png"
+                    alt="Linear"
+                    width={64}
+                    height={64}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Task Management</h3>
+                  <p className="text-gray-500">
+                    Transparent project tracking and task management through
+                    <strong> Linear</strong>
+                  </p>
+                </div>
+              </Link>
+              {/* Notion */}
+              <Link
+                href="https://notion.so/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
+                  <Image
+                    src="/img/png/notion.png"
+                    alt="Notion"
+                    width={64}
+                    height={64}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Documentation</h3>
+                  <p className="text-gray-500">
+                    Comprehensive documentation and knowledge base in{" "}
+                    <strong> Notion</strong>
+                  </p>
+                </div>
+              </Link>
+              {/* Github */}
+              <Link
+                href="https://github.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm">
+                  <Image
+                    src="/img/png/github.png"
+                    alt="Github"
+                    width={64}
+                    height={64}
+                    className="mb-4"
+                  />
+                  <h3 className="text-xl font-bold mb-2">Code Access</h3>
+                  <p className="text-gray-500">
+                    Secure code access and package management via{" "}
+                    <strong> Github</strong>
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+        <section
           id="pricing"
           className="w-full py-12 md:py-24 lg:py-32 bg-gray-50"
         >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
               Service Tiers
             </h2>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -311,7 +636,17 @@ export default function CloudFalconDevLanding() {
                 <p className="text-sm text-gray-500 mb-4">
                   Starting at $2,500 per project
                 </p>
-                <Button className="mt-auto">Get Started</Button>
+                <Button
+                  className="mt-auto"
+                  onClick={() => {
+                    document
+                      .getElementById("contact")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  aria-label="Contact us for more information"
+                >
+                  Get Started
+                </Button>{" "}
               </div>
 
               {/* Professional Tier */}
@@ -341,9 +676,17 @@ export default function CloudFalconDevLanding() {
                 <p className="text-sm text-blue-100 mb-4">
                   Starting at $5,000 per project
                 </p>
-                <Button className="bg-white text-blue-600 hover:bg-blue-50 mt-auto">
+                <Button
+                  className="bg-white text-blue-600 hover:bg-blue-50 mt-auto"
+                  onClick={() => {
+                    document
+                      .getElementById("contact")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  aria-label="Contact us for more information"
+                >
                   Get Started
-                </Button>
+                </Button>{" "}
               </div>
 
               {/* Enterprise Tier */}
@@ -371,11 +714,22 @@ export default function CloudFalconDevLanding() {
                 <p className="text-sm text-gray-500 mb-4">
                   Custom project-based pricing
                 </p>
-                <Button className="mt-auto">Contact Us</Button>
+                <Button
+                  className="mt-auto"
+                  onClick={() => {
+                    document
+                      .getElementById("contact")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  aria-label="Contact us for more information"
+                >
+                  Email Us
+                </Button>{" "}
               </div>
             </div>
           </div>
         </section>
+
         <section
           id="contact"
           className="w-full py-12 md:py-24 lg:py-32 bg-blue-600 text-white"
