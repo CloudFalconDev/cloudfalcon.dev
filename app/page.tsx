@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,11 +9,23 @@ import {
   Zap,
   CheckCircle,
   GraduationCap,
+  Twitter,
+  Linkedin,
+  Github,
+  Youtube,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function CloudFalconDevLanding() {
+  const handleContactClick = () => {
+    const subject = "CloudFalcon Dev Services Inquiry";
+    const body = "I'm interested in learning more about your services.";
+    window.location.href = `mailto:info@cloudfalcon.dev?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="w-full max-w-6xl mx-auto px-4 lg:px-6 h-14 flex items-center">
@@ -48,6 +62,12 @@ export default function CloudFalconDevLanding() {
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
+            href="#pricing"
+          >
+            Pricing
+          </Link>
+          <Link
+            className="text-sm font-medium hover:underline underline-offset-4"
             href="#contact"
           >
             Contact
@@ -55,22 +75,25 @@ export default function CloudFalconDevLanding() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-r from-slate-500 to-gray-400">
-          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative overflow-hidden">
+          <div
+            className="absolute inset-0 w-full h-full z-0"
+            style={{
+              backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMDAlJyBoZWlnaHQ9JzEwMCUnIHZpZXdCb3g9JzAgMCA4MCA4MCc+CiAgPGRlZnM+CiAgICA8cGF0dGVybiBpZD0ncGF0dGVybicgcGF0dGVyblVuaXRzPSd1c2VyU3BhY2VPblVzZScgd2lkdGg9JzgwJyBoZWlnaHQ9JzgwJyB2aWV3Qm94PScwIDAgNDAgNDAnPgogICAgICA8cmVjdCB3aWR0aD0nNDAnIGhlaWdodD0nNDAnIGZpbGw9JyMxZTI5M2InLz4KICAgICAgPHBhdGggZD0nTTAgMGw0MCA0MEgwVjB6bTQwIDBMMCA0MGg0MFYweicgZmlsbC1vcGFjaXR5PScwLjEnIGZpbGw9JyMzYjgyZjYnLz4KICAgICAgPHBhdGggZD0nTTIwIDBsMjAgMjBMMjAgNDBMMCA4MCcgZmlsbC1vcGFjaXR5PScwLjInIGZpbGw9JyM2MGE1ZmEnLz4KICAgIDwvcGF0dGVybj4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTAwJScgZmlsbD0ndXJsKCNwYXR0ZXJuKScvPgo8L3N2Zz4=")`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-gray-900/80" />
+          <div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
                   Optimize Your Cloud Infrastructure
                 </h1>
-                <p className="mx-auto max-w-[700px] text-gray-700 md:text-xl">
+                <p className="mx-auto max-w-[700px] text-gray-100 md:text-xl">
                   CloudFalconDev provides expert cloud automation, security,
                   cost optimization, and training services to elevate your
                   business.
                 </p>
-              </div>
-              <div className="space-x-4">
-                <Button>Get Started</Button>
-                <Button variant="outline">Learn More</Button>
               </div>
             </div>
           </div>
@@ -254,6 +277,107 @@ export default function CloudFalconDevLanding() {
           </div>
         </section>
         <section
+          id="pricing"
+          className="w-full py-12 md:py-24 lg:py-32 bg-gray-50"
+        >
+          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12">
+              Service Tiers
+            </h2>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Basic Tier */}
+              <div className="flex flex-col p-6 bg-white rounded-lg shadow-sm">
+                <h3 className="text-xl font-bold mb-4">Basic Tier</h3>
+                <p className="text-gray-500 mb-6">
+                  Cloud Assessment & Planning
+                </p>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Initial cloud readiness assessment</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Basic migration planning</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Monthly cost optimization review</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Business hours support</span>
+                  </li>
+                </ul>
+                <p className="text-sm text-gray-500 mb-4">
+                  Starting at $2,500 per project
+                </p>
+                <Button className="mt-auto">Get Started</Button>
+              </div>
+
+              {/* Professional Tier */}
+              <div className="flex flex-col p-6 bg-blue-600 rounded-lg shadow-sm text-white">
+                <h3 className="text-xl font-bold mb-4">Professional Tier</h3>
+                <p className="text-blue-100 mb-6">
+                  Implementation & Management
+                </p>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-blue-300 mr-2" />
+                    <span>Everything in Basic tier</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-blue-300 mr-2" />
+                    <span>Full migration execution</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-blue-300 mr-2" />
+                    <span>Cloud architecture design</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-blue-300 mr-2" />
+                    <span>24/7 support</span>
+                  </li>
+                </ul>
+                <p className="text-sm text-blue-100 mb-4">
+                  Starting at $5,000 per project
+                </p>
+                <Button className="bg-white text-blue-600 hover:bg-blue-50 mt-auto">
+                  Get Started
+                </Button>
+              </div>
+
+              {/* Enterprise Tier */}
+              <div className="flex flex-col p-6 bg-white rounded-lg shadow-sm">
+                <h3 className="text-xl font-bold mb-4">Enterprise Tier</h3>
+                <p className="text-gray-500 mb-6">Strategic Partnership</p>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Everything in Professional tier</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Dedicated team</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Custom solutions development</span>
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <span>Priority support</span>
+                  </li>
+                </ul>
+                <p className="text-sm text-gray-500 mb-4">
+                  Custom project-based pricing
+                </p>
+                <Button className="mt-auto">Contact Us</Button>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section
           id="contact"
           className="w-full py-12 md:py-24 lg:py-32 bg-blue-600 text-white"
         >
@@ -269,25 +393,20 @@ export default function CloudFalconDevLanding() {
                 </p>
               </div>
               <div className="w-full max-w-sm space-y-4">
-                <form className="flex space-x-2">
-                  <Input
-                    className="max-w-lg flex-1 bg-white text-gray-900"
-                    placeholder="Enter your email"
-                    type="email"
-                  />
-                  <Button className="bg-white text-blue-600" type="submit">
-                    Contact Us
-                  </Button>
-                </form>
-                <div className="flex items-center justify-center space-x-2">
-                  <p className="text-l text-blue-100">Or call us:</p>
-                  <a
-                    href="tel:+96890131817"
-                    className="text-sm text-blue-100 hover:underline"
-                  >
-                    +968 90131817
-                  </a>
-                </div>
+                <Button
+                  className="bg-white text-blue-600"
+                  type="button"
+                  onClick={handleContactClick}
+                >
+                  Email Us
+                </Button>{" "}
+                | Or call us:{" "}
+                <a
+                  href="tel:+96890131817"
+                  className="text-sm text-blue-100 hover:underline"
+                >
+                  +968 90131817
+                </a>
                 <p className="text-xs text-blue-100">
                   We respect your privacy.
                 </p>
@@ -296,6 +415,47 @@ export default function CloudFalconDevLanding() {
           </div>
         </section>
       </main>
+      <footer className="w-full py-6 bg-gray-50">
+        <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+          <div className="flex justify-center items-center space-x-6">
+            <Link
+              href="https://twitter.com/cloudfalcondev"
+              target="_blank"
+              className="text-gray-600 hover:text-blue-400 transition-colors"
+            >
+              <Twitter className="h-6 w-6" />
+              <span className="sr-only">Twitter</span>
+            </Link>
+
+            <Link
+              href="https://linkedin.com/company/cloudfalcondev"
+              target="_blank"
+              className="text-gray-600 hover:text-blue-700 transition-colors"
+            >
+              <Linkedin className="h-6 w-6" />
+              <span className="sr-only">LinkedIn</span>
+            </Link>
+
+            <Link
+              href="https://github.com/cloudfalcondev"
+              target="_blank"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <Github className="h-6 w-6" />
+              <span className="sr-only">GitHub</span>
+            </Link>
+
+            <Link
+              href="https://youtube.com/@cloudfalcondev"
+              target="_blank"
+              className="text-gray-600 hover:text-red-600 transition-colors"
+            >
+              <Youtube className="h-6 w-6" />
+              <span className="sr-only">YouTube</span>
+            </Link>
+          </div>
+        </div>
+      </footer>
       <footer className="w-full max-w-6xl mx-auto flex flex-col gap-2 sm:flex-row py-6 shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-gray-500">
           © 2015 - {new Date().getFullYear()} CloudFalconDev -
