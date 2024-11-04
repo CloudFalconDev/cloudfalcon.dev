@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Origami,
   Shield,
   DollarSign,
   Zap,
@@ -14,6 +13,13 @@ import {
   Linkedin,
   Github,
   Youtube,
+  LineChart,
+  BarChart,
+  ArrowUpCircle,
+  Server,
+  Cloud,
+  Lock,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -21,6 +27,8 @@ import React from "react";
 import * as THREE from "three";
 import { useEffect, useRef } from "react";
 import CalendlyWidget from "@/components/CalendlyWidget";
+import CountUp from "react-countup";
+import { motion } from "framer-motion";
 
 function GeometricBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,8 +38,6 @@ function GeometricBackground() {
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    // Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       75,
@@ -48,7 +54,6 @@ function GeometricBackground() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     containerRef.current.appendChild(renderer.domElement);
 
-    // Create geometric shapes
     const geometry = new THREE.IcosahedronGeometry(2, 1);
     const material = new THREE.MeshPhongMaterial({
       color: "#3b82f6",
@@ -59,21 +64,17 @@ function GeometricBackground() {
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    // Add lights
     const light = new THREE.DirectionalLight("#60a5fa", 1);
     light.position.set(0, 0, 2);
     scene.add(light);
     scene.add(new THREE.AmbientLight("#1e293b", 0.5));
 
-    // Camera setup
     camera.position.z = 1; // Adjust depth
     camera.position.y = 0; // Center vertically
     camera.position.x = 0; // Center horizontally
 
-    // Update mesh position
     mesh.position.set(0, 0, 0); // Center the mesh
 
-    // Animation
     const animate = () => {
       requestAnimationFrame(animate);
       mesh.rotation.x += 0.001;
@@ -81,7 +82,6 @@ function GeometricBackground() {
       renderer.render(scene, camera);
     };
 
-    // Mouse interaction
     const onMouseMove = (event: MouseEvent) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -92,7 +92,6 @@ function GeometricBackground() {
     window.addEventListener("mousemove", onMouseMove);
     animate();
 
-    // Cleanup
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       if (containerRef.current) {
@@ -101,7 +100,6 @@ function GeometricBackground() {
     };
   }, []);
 
-  // Add resize handler
   useEffect(() => {
     const handleResize = () => {
       const container = containerRef.current;
@@ -121,7 +119,6 @@ function GeometricBackground() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Update container styles
   return (
     <div
       ref={containerRef}
@@ -136,7 +133,83 @@ function GeometricBackground() {
   );
 }
 
-export default function CloudFalconDevLanding() {
+const serviceDetails = [
+  {
+    icon: <Zap className="h-12 w-12" />,
+    title: "Cloud Automation",
+    description:
+      "Streamline your operations with cutting-edge automation solutions.",
+    stats: { value: "50%", label: "Reduced Manual Tasks" },
+    features: [
+      {
+        icon: <Server className="h-5 w-5" />,
+        text: "Infrastructure as Code (IaC)",
+      },
+      {
+        icon: <Cloud className="h-5 w-5" />,
+        text: "CI/CD Pipeline Automation",
+      },
+      {
+        icon: <Clock className="h-5 w-5" />,
+        text: "Automated Scaling & Monitoring",
+      },
+    ],
+    gradient: "from-blue-500 to-cyan-500",
+  },
+  {
+    icon: <Shield className="h-12 w-12" />,
+    title: "Cloud Security",
+    description: "Protect your assets with advanced security measures.",
+    stats: { value: "99.9%", label: "Security Compliance" },
+    features: [
+      { icon: <Lock className="h-5 w-5" />, text: "Zero Trust Architecture" },
+      {
+        icon: <CheckCircle className="h-5 w-5" />,
+        text: "Compliance Automation",
+      },
+      { icon: <Users className="h-5 w-5" />, text: "Identity Management" },
+    ],
+    gradient: "from-purple-500 to-pink-500",
+  },
+  {
+    icon: <DollarSign className="h-12 w-12" />,
+    title: "Cost Optimization",
+    description: "Maximize ROI with cost-effective strategies.",
+    stats: { value: "40%", label: "Average Cost Reduction" },
+    features: [
+      {
+        icon: <LineChart className="h-5 w-5" />,
+        text: "Resource Usage Analysis",
+      },
+      {
+        icon: <Cloud className="h-5 w-5" />,
+        text: "Automated Cost Monitoring",
+      },
+      {
+        icon: <CheckCircle className="h-5 w-5" />,
+        text: "Optimization Recommendations",
+      },
+    ],
+    gradient: "from-green-500 to-emerald-500",
+  },
+  {
+    icon: <GraduationCap className="h-12 w-12" />,
+    title: "Cloud Training",
+    description: "Expert training for your team.",
+    stats: { value: "100+", label: "Engineers Trained" },
+    features: [
+      {
+        icon: <Users className="h-5 w-5" />,
+        text: "Customized Training Programs",
+      },
+      { icon: <CheckCircle className="h-5 w-5" />, text: "Hands-on Workshops" },
+      { icon: <Clock className="h-5 w-5" />, text: "Ongoing Support" },
+    ],
+    gradient: "from-orange-500 to-red-500",
+  },
+];
+
+export default function CloudFalconLanding() {
   const handleContactClick = () => {
     const subject = "CloudFalcon Dev Services Inquiry";
     const body = "I'm interested in learning more about your services.";
@@ -147,14 +220,16 @@ export default function CloudFalconDevLanding() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="w-full max-w-6xl mx-auto px-4 lg:px-6 h-14 flex items-center">
+      <header className="w-full max-w-6xl mx-auto px-4 lg:px-6 h-14 flex items-center justify-between">
+        {/* Brand/Logo - Left aligned */}
         <Link className="flex items-center justify-center" href="#">
-          <Origami className="h-6 w-6 text-blue-600" />
           <span className="ml-2 text-2xl font-bold text-gray-900">
-            CloudFalconDev
+            CloudFalcon
           </span>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+
+        {/* Navigation - Centered */}
+        <nav className="absolute left-1/2 transform -translate-x-1/2 flex gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
             href="#services"
@@ -163,17 +238,31 @@ export default function CloudFalconDevLanding() {
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
+            href="#cloud-platforms"
+          >
+            Platforms
+          </Link>
+          <Link
+            className="text-sm font-medium hover:underline underline-offset-4"
+            href="#cloud-tools"
+          >
+            Tools
+          </Link>
+          <Link
+            className="text-sm font-medium hover:underline underline-offset-4"
             href="#pricing"
           >
             Pricing
           </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#contact"
-          >
-            Contact
-          </Link>
         </nav>
+
+        {/* Contact button - Right aligned */}
+        <Button
+          onClick={handleContactClick}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Contact Us
+        </Button>
       </header>
       <main className="flex-1">
         <section className="w-full py-8 md:py-16 lg:py-24 xl:py-32 relative overflow-hidden">
@@ -183,54 +272,90 @@ export default function CloudFalconDevLanding() {
             <div className="flex flex-col items-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
-                  Optimize Your Cloud Infrastructure
+                  Optimize Your Cloud and Ship faster with IaC in the same
+                  programming language you use
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-100 md:text-xl">
-                  CloudFalconDev provides expert cloud automation, security,
-                  cost optimization, and training services to elevate your
-                  business.
+                  CloudFalcon provides expert cloud automation, security, cost
+                  optimization, and training services to elevate your business.
                 </p>
               </div>
             </div>
           </div>
         </section>
-        <section id="services" className="w-full py-12 md:py-24 lg:py-32">
+        <section
+          id="services"
+          className="w-full py-12 md:py-24 lg:py-32 bg-gray-50"
+        >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500"
+            >
               Our Services
-            </h2>
-            <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="flex flex-col items-center text-center">
-                <Zap className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-xl font-bold mb-2">Cloud Automation</h3>
-                <p className="text-gray-500">
-                  Streamline your operations with cutting-edge automation
-                  solutions.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <Shield className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-xl font-bold mb-2">Cloud Security</h3>
-                <p className="text-gray-500">
-                  Protect your assets with our advanced cloud security measures.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <DollarSign className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-xl font-bold mb-2">
-                  Cloud Cost Optimization
-                </h3>
-                <p className="text-gray-500">
-                  Maximize your ROI with our cost-effective cloud strategies.
-                </p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <GraduationCap className="h-12 w-12 text-blue-600 mb-4" />
-                <h3 className="text-xl font-bold mb-2">Cloud Training</h3>
-                <p className="text-gray-500">
-                  Empower your team with expert-led cloud technology training.
-                </p>
-              </div>
+            </motion.h2>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {serviceDetails.map((service, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="group relative overflow-hidden rounded-xl p-6 bg-white shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
+                  />
+                  <div className="relative z-10 space-y-4">
+                    <div className="mb-4 p-3 rounded-full bg-blue-50 inline-block">
+                      {service.icon}
+                    </div>
+
+                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors">
+                      {service.title}
+                    </h3>
+
+                    <p className="text-gray-500 group-hover:text-gray-600 transition-colors">
+                      {service.description}
+                    </p>
+
+                    <div className="py-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-3xl font-bold text-blue-600">
+                          {service.stats.value}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {service.stats.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-3">
+                      {service.features.map((feature, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-center text-gray-600"
+                        >
+                          <span className="mr-2 text-blue-500">
+                            {feature.icon}
+                          </span>
+                          {feature.text}
+                        </li>
+                      ))}
+                    </ul>
+
+                    <motion.div
+                      className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500"
+                      initial={{ width: "0%" }}
+                      whileHover={{ width: "100%" }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -284,6 +409,33 @@ export default function CloudFalconDevLanding() {
                 </h3> */}
                 <p className="text-gray-500">
                   Optimize your GCP environment with our tailored solutions.
+                </p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg">
+                <Image
+                  src="/img/svg/cncf.svg"
+                  alt="CNCF Logo"
+                  width={250}
+                  height={150}
+                  className="mb-4"
+                />
+                <p className="text-gray-500">
+                  Expert implementation of <code>CNCF</code> technologies
+                  including Kubernetes, Prometheus, and other graduated
+                  projects.
+                </p>
+              </div>
+              <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-lg">
+                <Image
+                  src="/img/svg/hashicorp.svg"
+                  alt="Hashicorp Logo"
+                  width={250}
+                  height={150}
+                  className="mb-4"
+                />
+                <p className="text-gray-500">
+                  Expertise in HashiCorp suite including Terraform, Vault,
+                  Consul, and Nomad for infrastructure automation and security.
                 </p>
               </div>
             </div>
@@ -451,6 +603,70 @@ export default function CloudFalconDevLanding() {
             </div>
           </div>
         </section>
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-50">
+          <div className="container px-4 md:px-6 max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
+              Impact & Results
+            </h2>
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Performance Improvement */}
+              <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+                <ArrowUpCircle className="h-12 w-12 text-blue-600 mb-4" />
+                <CountUp
+                  end={50}
+                  suffix="%"
+                  className="text-4xl font-bold text-blue-600"
+                  duration={2.5}
+                />
+                <p className="text-gray-600 mt-2 text-center">
+                  Average Performance Improvement
+                </p>
+              </div>
+
+              {/* Cost Reduction */}
+              <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+                <LineChart className="h-12 w-12 text-blue-600 mb-4" />
+                <CountUp
+                  end={40}
+                  suffix="%"
+                  className="text-4xl font-bold text-blue-600"
+                  duration={2.5}
+                />
+                <p className="text-gray-600 mt-2 text-center">
+                  Average Cost Reduction
+                </p>
+              </div>
+
+              {/* Servers Managed */}
+              <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+                <Server className="h-12 w-12 text-blue-600 mb-4" />
+                <CountUp
+                  end={1000}
+                  prefix=">"
+                  className="text-4xl font-bold text-blue-600"
+                  duration={2.5}
+                />
+                <p className="text-gray-600 mt-2 text-center">
+                  Servers | Containers Managed
+                </p>
+              </div>
+
+              {/* Deployment Time */}
+              <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm">
+                <BarChart className="h-12 w-12 text-blue-600 mb-4" />
+                <CountUp
+                  end={50}
+                  suffix="%"
+                  className="text-4xl font-bold text-blue-600"
+                  duration={2.5}
+                />
+                <p className="text-gray-600 mt-2 text-center">
+                  Faster Deployment Time
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
         <section className="w-full py-12 bg-white/5 backdrop-blur-sm">
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
@@ -498,7 +714,7 @@ export default function CloudFalconDevLanding() {
         >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
-              Why Choose CloudFalconDev
+              Why Choose CloudFalcon
             </h2>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[
@@ -523,7 +739,7 @@ export default function CloudFalconDevLanding() {
         >
           <div className="container px-4 md:px-6 max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500">
-              How CloudFalconDev Works
+              How CloudFalcon Works
             </h2>
             <h4 className="text-2xl font-bold text-center mb-8 text-gray-700">
               You will be invited to our streamlined process to ensures a
@@ -844,7 +1060,7 @@ export default function CloudFalconDevLanding() {
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-500">
-              © 2015 - {new Date().getFullYear()} CloudFalconDev{" "}
+              © 2015 - {new Date().getFullYear()} CloudFalcon{" "}
             </p>
             <nav className="sm:ml-auto flex gap-4 sm:gap-6">
               <Link
