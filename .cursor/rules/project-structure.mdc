@@ -27,3 +27,8 @@ This project is a [Next.js](mdc:README.md) application using the `/app` director
 - [public/img/](mdc:public/img): Static assets (SVG, PNG logos, etc.).
 
 Navigation and layout are modularized for maintainability and reusability.
+
+## Landing Page Section Components
+- Major sections of the landing page (e.g., Services, Platforms, IaC Tools, Services Automation, Pricing) must each be implemented as a separate React component in the `components/` directory.
+- These section components should be imported and used in `app/page.tsx` instead of inline section code.
+- This modular approach improves maintainability, readability, and reusability.
