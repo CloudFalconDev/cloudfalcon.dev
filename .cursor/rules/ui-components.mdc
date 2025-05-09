@@ -11,3 +11,5 @@ The [components/ui/](mdc:components/ui) directory contains reusable UI primitive
 - [input.tsx](mdc:components/ui/input.tsx): Provides a styled Input component for form fields.
 
 These components are designed to be used throughout the app for consistent UI and styling. Utility functions for class names are imported from [lib/utils.ts](mdc:lib/utils.ts).
+
+- Major page sections (e.g., Services, Platforms, Pricing) should be implemented as dedicated React components in the `components/` directory, not as inline code in page files. This supports the modular section approach described in project-structure.mdc.
