@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Configuration Files Guide
+
+Key configuration files in the project:
+
+- [tailwind.config.ts](mdc:tailwind.config.ts): Configures Tailwind CSS, including custom colors, border radius, and plugins.
+- [next.config.mjs](mdc:next.config.mjs): Next.js configuration, e.g., enabling SVG images.
+- [tsconfig.json](mdc:tsconfig.json): TypeScript configuration, including path aliases and strictness settings.
+
+These files control the project's build, styling, and type-checking behavior.
