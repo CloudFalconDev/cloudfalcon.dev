@@ -1,5 +1,7 @@
 # CloudFalcon Next.js Landing Page
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b1673ddf-4174-496d-ac47-348f839d759f/deploy-status)](https://app.netlify.com/sites/cloudfalcondev/deploys)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
