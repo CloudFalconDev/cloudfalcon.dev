@@ -213,8 +213,8 @@ export default function CloudFalconLanding() {
 									"Proven track record of success",
 									"Cutting-edge technology and best practices",
 									"Significant cost savings for our clients",
-								].map((item, index) => (
-									<div key={index} className="flex items-center space-x-2">
+								].map((item) => (
+									<div key={item} className="flex items-center space-x-2">
 										<CheckCircle className="h-6 w-6 text-green-500" />
 										<span>{item}</span>
 									</div>

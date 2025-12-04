@@ -16,12 +16,11 @@ export default function IaCToolsSection() {
 				>
 					IaC Tools We Use
 				</h2>
-				<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-					{iacTools.map((tool, index) => (
-						<div
-							key={index}
-							className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm"
-							role="listitem"
+				<ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+					{iacTools.map((tool) => (
+						<li
+							key={tool.name}
+							className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm list-none"
 						>
 							<Link
 								href={tool.link}
@@ -40,9 +39,9 @@ export default function IaCToolsSection() {
 								<h3 className="text-xl font-bold mb-2">{tool.name}</h3>
 								<p className="text-gray-500">{tool.description}</p>
 							</Link>
-						</div>
+						</li>
 					))}
-				</div>
+				</ul>
 			</div>
 		</section>
 	);

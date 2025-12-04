@@ -1,8 +1,8 @@
 {
-  "mcpServers": {
-    "netlify": {
-      "command": "npx",
-      "args": ["-y", "@netlify/mcp"]
-    }
-  }
+	"mcpServers": {
+		"netlify": {
+			"command": "npx",
+			"args": ["-y", "@netlify/mcp"]
+		}
+	}
 }

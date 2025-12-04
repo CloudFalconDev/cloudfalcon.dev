@@ -19,7 +19,7 @@ export default function ServicesSection() {
 				<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
 					{serviceDetails.map((service, index) => (
 						<motion.div
-							key={index}
+							key={service.title}
 							initial={{ opacity: 0, y: 20 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -50,8 +50,11 @@ export default function ServicesSection() {
 									</div>
 								</div>
 								<ul className="space-y-3">
-									{service.features.map((feature, idx) => (
-										<li key={idx} className="flex items-center text-gray-600">
+									{service.features.map((feature) => (
+										<li
+											key={feature.text}
+											className="flex items-center text-gray-600"
+										>
 											<span className="mr-2 text-blue-500">{feature.icon}</span>
 											{feature.text}
 										</li>
