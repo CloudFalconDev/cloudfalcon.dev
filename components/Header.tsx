@@ -17,16 +17,14 @@ export default function Header({
 				href="#"
 				aria-label="CloudFalcon Home"
 			>
-				<span className="ml-2 text-2xl font-bold text-gray-900">
-					CloudFalcon
-				</span>
+				<span className="ml-2 text-2xl font-bold text-olive">CloudFalcon</span>
 			</Link>
 			{/* Navigation - Centered */}
 			<MainNavComponent />
 			{/* Contact button - Right aligned */}
 			<Button
 				onClick={onContactClick}
-				className="bg-blue-600 text-white hover:bg-blue-700"
+				className="bg-moss text-cream hover:bg-moss/90"
 				aria-label="Contact Us"
 			>
 				Contact Us

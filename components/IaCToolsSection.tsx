@@ -6,13 +6,13 @@ export default function IaCToolsSection() {
 	return (
 		<section
 			id="iac-tools"
-			className="w-full py-12 md:py-24 lg:py-32 bg-gray-50"
+			className="w-full py-12 md:py-24 lg:py-32 bg-sage"
 			aria-labelledby="iac-tools-heading"
 		>
 			<div className="container px-4 md:px-6 max-w-6xl mx-auto">
 				<h2
 					id="iac-tools-heading"
-					className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-blue-500"
+					className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-moss"
 				>
 					IaC Tools We Use
 				</h2>
@@ -20,7 +20,7 @@ export default function IaCToolsSection() {
 					{iacTools.map((tool) => (
 						<li
 							key={tool.name}
-							className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm list-none"
+							className="flex flex-col items-center text-center p-6 bg-cream rounded-lg shadow-sm list-none"
 						>
 							<Link
 								href={tool.link}
@@ -36,8 +36,10 @@ export default function IaCToolsSection() {
 									height={50}
 									className="mb-4"
 								/>
-								<h3 className="text-xl font-bold mb-2">{tool.name}</h3>
-								<p className="text-gray-500">{tool.description}</p>
+								<h3 className="text-xl font-bold mb-2 text-olive">
+									{tool.name}
+								</h3>
+								<p className="text-olive">{tool.description}</p>
 							</Link>
 						</li>
 					))}

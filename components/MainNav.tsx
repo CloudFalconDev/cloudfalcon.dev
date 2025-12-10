@@ -29,19 +29,19 @@ export default function MainNav() {
 			aria-label="Main navigation"
 		>
 			<Link
-				className="text-md font-medium hover:underline underline-offset-4 flex items-center gap-1"
+				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
 				href={sectionLink("#services")}
 			>
 				<Home className="w-4 h-4" /> Services
 			</Link>
 			<Link
-				className="text-md font-medium hover:underline underline-offset-4 flex items-center gap-1"
+				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
 				href={sectionLink("#cloud-platforms")}
 			>
 				<Cloud className="w-4 h-4" /> Platforms
 			</Link>
 			<Link
-				className="text-md font-medium hover:underline underline-offset-4 flex items-center gap-1"
+				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
 				href={sectionLink("#iac-tools")}
 				aria-label="Infrastructure as Code Tools"
 			>
@@ -50,7 +50,7 @@ export default function MainNav() {
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<button
-						className="text-md font-medium hover:underline underline-offset-4 flex items-center gap-1 focus:outline-none"
+						className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1 focus:outline-none"
 						aria-haspopup="true"
 						aria-controls="tools-menu"
 						type="button"
@@ -59,11 +59,15 @@ export default function MainNav() {
 						<ChevronDown className="w-4 h-4" />
 					</button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="start" id="tools-menu" className="w-48">
+				<DropdownMenuContent
+					align="start"
+					id="tools-menu"
+					className="w-48 bg-cream"
+				>
 					<DropdownMenuItem asChild>
 						<Link
 							href="/kubernetes"
-							className="flex items-center gap-2"
+							className="flex items-center gap-2 text-olive hover:text-moss"
 							aria-label="Kubernetes Tools"
 						>
 							<Network className="w-4 h-4" /> Kubernetes
@@ -72,7 +76,7 @@ export default function MainNav() {
 					<DropdownMenuItem asChild>
 						<Link
 							href="/security"
-							className="flex items-center gap-2"
+							className="flex items-center gap-2 text-olive hover:text-moss"
 							aria-label="Security Tools"
 						>
 							<Shield className="w-4 h-4" /> Security
@@ -81,7 +85,7 @@ export default function MainNav() {
 					<DropdownMenuItem asChild>
 						<Link
 							href="/terraform"
-							className="flex items-center gap-2"
+							className="flex items-center gap-2 text-olive hover:text-moss"
 							aria-label="Terraform Tools"
 						>
 							<FileText className="w-4 h-4" /> Terraform
@@ -90,7 +94,7 @@ export default function MainNav() {
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<Link
-				className="text-md font-medium hover:underline underline-offset-4 flex items-center gap-1"
+				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
 				href={sectionLink("#pricing")}
 			>
 				<Tag className="w-4 h-4" /> Pricing

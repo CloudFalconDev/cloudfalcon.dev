@@ -14,6 +14,7 @@ npm run check    # Run Biome lint + format check
 ```
 
 Dependency management:
+
 ```bash
 npm run check-latest   # Check for available updates
 npm run force-latest   # Update all dependencies to latest
@@ -33,6 +34,7 @@ npm run force-latest   # Update all dependencies to latest
 ## Architecture
 
 ### Page Structure
+
 - `app/page.tsx` - Main landing page, composes section components
 - `app/kubernetes/page.tsx` - Kubernetes tools subpage
 - `app/terraform/page.tsx` - Terraform tools subpage
@@ -40,24 +42,32 @@ npm run force-latest   # Update all dependencies to latest
 - `app/layout.tsx` - Root layout with Geist fonts
 
 ### Component Pattern
+
 Major landing page sections are implemented as dedicated components in `components/`:
+
 - `ServicesSection.tsx`, `PlatformsSection.tsx`, `IaCToolsSection.tsx`
-- `ServicesAutomationSection.tsx`, `PricingSection.tsx`
+- `IntegrationsSection.tsx`, `PricingSection.tsx`
 - `Header.tsx`, `Footer.tsx`, `MainNav.tsx`
 
-**Convention**: New sections should be created as separate components and imported into `app/page.tsx`.
+**Convention**: New sections should be created as separate components and imported into `app/page.tsx`. Components with list data should import that data from the `data/` directory.
 
 ### Data Layer
+
 Tool/service data lives in `data/` directory:
+
 - `serviceDetails.tsx` - Service offerings data
+- `platforms.ts` - Cloud platforms data (AWS, Azure, GCP, etc.)
+- `integrations.ts` - Third-party integrations (Datadog, Vanta, etc.)
 - `kubernetesTools.tsx`, `terraformTools.tsx`, `securityTools.tsx` - Tool listings
 - `iacTools.ts` - Infrastructure as Code tools
 
 ### Utilities
+
 - `lib/utils.ts` - Contains `cn()` function for class name merging (clsx + tailwind-merge)
 - `components/ui/` - Reusable UI primitives (Button, Input) using class-variance-authority
 
 ### Static Assets
+
 - `public/img/svg/` - SVG logos (AWS, Azure, GCP, etc.)
 - `public/img/png/` - PNG logos and images
 - `app/fonts/` - Geist variable fonts
@@ -65,6 +75,7 @@ Tool/service data lives in `data/` directory:
 ## Tailwind CSS v4 Configuration
 
 Theme configuration is in `app/globals.css` using the `@theme` directive:
+
 ```css
 @import "tailwindcss";
 
@@ -80,19 +91,24 @@ CSS variables for light/dark modes are defined in `:root` and `.dark` selectors.
 ## Git Hooks
 
 Pre-commit hooks via Husky + lint-staged auto-run Biome on staged files:
+
 - `.husky/pre-commit` - Runs `npx lint-staged`
 - Configured in `package.json` under `lint-staged`
 
 ## CI/CD
 
 ### GitHub Actions (`.github/workflows/ci.yml`)
+
 Runs on push/PR to main:
+
 1. `npm ci` - Install dependencies
 2. `npm run lint` - Biome linting
 3. `npm run build` - Production build
 
 ### Renovate (`.github/renovate.json`)
+
 Automated dependency updates:
+
 - Runs weekly (Mondays before 6am)
 - Auto-merges patch/minor updates
 - Keeping GitHub Actions Up to Date

@@ -3,6 +3,10 @@
 		"netlify": {
 			"command": "npx",
 			"args": ["-y", "@netlify/mcp"]
+		},
+		"shadcn": {
+			"type": "http",
+			"url": "https://www.shadcn.io/api/mcp"
 		}
 	}
 }
