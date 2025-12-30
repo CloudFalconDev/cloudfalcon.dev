@@ -1,0 +1,35 @@
+import { FaGithub } from "react-icons/fa";
+
+# Module: AWS Backend
+
+:::info Github
+
+<FaGithub /> @mhmdio/terraform-aws-backend
+
+:::
+
+:::info Terraform Registry
+**[mhmdio/backend/aws/latest](https://registry.terraform.io/modules/mhmdio/backend/aws/latest)**
+:::
+
+This Module is used to bootstrap new AWS account, and prepare them to be used with
+Terraform. Creates:
+
+- backend S3 bucket
+- DynamoDB table
+- KMS key
+
+for managing Terraform state.
+
+## Diagram
+
+![AWS S3 Backend](/images/docs/diagrams/aws_s3_backend.png)
+
+## Perquisites
+
+```bash
+git clone REPO_URL
+cd REPO_PATH
+pre-commit install
+tfenv install
+```

@@ -46,4 +46,12 @@ export const platforms = [
 		description:
 			"Simplified cloud infrastructure with DigitalOcean's developer-friendly platform for deploying and scaling applications.",
 	},
+	{
+		name: "Cloudflare",
+		href: "https://www.cloudflare.com/",
+		logo: "/img/svg/cloudflare.svg",
+		alt: "Cloudflare Logo",
+		description:
+			"Accelerate and secure your web applications with Cloudflare's global edge network and serverless platform.",
+	},
 ];

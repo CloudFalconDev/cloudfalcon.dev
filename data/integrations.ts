@@ -31,4 +31,12 @@ export const integrations = [
 		description:
 			"Automated repository management, CI/CD pipelines, and security controls.",
 	},
+	{
+		name: "n8n",
+		href: "https://n8n.io/",
+		logo: "/img/svg/n8n.svg",
+		alt: "n8n",
+		description:
+			"Fair-code workflow automation tool that lets you interconnect your apps with APIs",
+	},
 ];

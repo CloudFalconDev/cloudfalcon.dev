@@ -16,8 +16,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-	title: "CloudFalconDev",
-	description: "Optimize Your Cloud Infrastructure",
+	title: "CloudFalcon | Cloud Automation, Security, and IaC Experts",
+	description:
+		"CloudFalcon orchestrates production-grade automation, hardens security postures, refactors cost structures, and bootstraps engineering teams via technical deep-dives.",
 };
 
 export default function RootLayout({
@@ -28,7 +29,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground selection:bg-primary/20`}
 			>
 				{children}
 			</body>

@@ -1,19 +1,17 @@
 "use client";
 
+import { motion } from "framer-motion";
 import {
 	ArrowUpCircle,
 	BarChart,
-	CheckCircle,
-	FolderGit2,
 	LineChart,
+	Network,
 	Server,
-	Users,
 } from "lucide-react";
-import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
-import CountUp from "react-countup";
+import { useEffect, useState } from "react";
 import CalendlyWidget from "@/components/CalendlyWidget";
+import EcosystemAccordion from "@/components/EcosystemAccordion";
 import Footer from "@/components/Footer";
 import GeometricBackground from "@/components/GeometricBackground";
 import Header from "@/components/Header";
@@ -23,359 +21,409 @@ import MainNav from "@/components/MainNav";
 import PlatformsSection from "@/components/PlatformsSection";
 import PricingSection from "@/components/PricingSection";
 import ServicesSection from "@/components/ServicesSection";
+import TelemetryCard from "@/components/TelemetryCard";
 import { Button } from "@/components/ui/button";
+import { pipelineSteps } from "@/data/pipelineSteps";
 import { handleContactClick } from "@/lib/contact";
 
+const TAGLINES = [
+	"Ship faster with IaC in the same language you use",
+	"Kill YAML complexity with Infrastructure as Code",
+	"Deploy Zero-Trust environments programmatically",
+	"Orchestrate multi-cloud nodes at scale",
+	"Reduce cloud burn with automated FinOps",
+	"Implement self-healing system modules",
+	"Orchestrate Kubernetes with pure TypeScript",
+];
+
 export default function CloudFalconLanding() {
+	const [index, setIndex] = useState(0);
+	const [displayText, setDisplayText] = useState("");
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [speed, setTypingSpeed] = useState(100);
+
+	useEffect(() => {
+		const handleTyping = () => {
+			const fullText = TAGLINES[index];
+			if (!isDeleting) {
+				setDisplayText(fullText.substring(0, displayText.length + 1));
+				setTypingSpeed(50);
+				if (displayText === fullText)
+					setTimeout(() => setIsDeleting(true), 2000);
+			} else {
+				setDisplayText(fullText.substring(0, displayText.length - 1));
+				setTypingSpeed(30);
+				if (displayText === "") {
+					setIsDeleting(false);
+					setIndex((prev) => (prev + 1) % TAGLINES.length);
+				}
+			}
+		};
+		const timer = setTimeout(handleTyping, speed);
+		return () => clearTimeout(timer);
+	}, [displayText, isDeleting, index, speed]);
+
 	return (
-		<>
-			<Head>
-				<title>CloudFalcon | Cloud Automation, Security, and IaC Experts</title>
-				<meta
-					name="description"
-					content="CloudFalcon provides expert cloud automation, security, cost optimization, and training services to elevate your business."
-				/>
-				<meta
-					property="og:title"
-					content="CloudFalcon | Cloud Automation, Security, and IaC Experts"
-				/>
-				<meta
-					property="og:description"
-					content="CloudFalcon provides expert cloud automation, security, cost optimization, and training services to elevate your business."
-				/>
-				<meta property="og:image" content="/img/png/cloudfalcon-og.png" />
-				<meta property="og:type" content="website" />
-				<meta name="twitter:card" content="summary_large_image" />
-				<meta
-					name="twitter:title"
-					content="CloudFalcon | Cloud Automation, Security, and IaC Experts"
-				/>
-				<meta
-					name="twitter:description"
-					content="CloudFalcon provides expert cloud automation, security, cost optimization, and training services to elevate your business."
-				/>
-				<meta name="twitter:image" content="/img/png/cloudfalcon-og.png" />
-			</Head>
-			<div className="flex flex-col min-h-screen">
-				<Header
-					onContactClick={handleContactClick}
-					MainNavComponent={MainNav}
-				/>
-				<main className="flex-1">
-					<section
-						className="w-full py-8 md:py-16 lg:py-24 xl:py-32 relative overflow-hidden"
-						aria-labelledby="hero-heading"
-					>
-						<GeometricBackground />
-						<div className="absolute inset-0 bg-gradient-to-r from-olive/90 to-olive/95" />
-						<div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
-							<div className="flex flex-col items-center space-y-4 text-center">
-								<div className="space-y-2">
-									<h1
-										id="hero-heading"
-										className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white"
-									>
-										Optimize Your Cloud and Ship faster with IaC in the same
-										programming language you use
-									</h1>
-									<p className="mx-auto max-w-[700px] text-cream md:text-xl">
-										CloudFalcon provides expert cloud automation, security, cost
-										optimization, and training services to elevate your
-										business.
-									</p>
+		<div className="flex flex-col min-h-screen relative">
+			<GeometricBackground />
+			<Header MainNavComponent={MainNav} />
+			<main className="flex-1 relative z-10">
+				{/* 0x00 // HERO */}
+				<section className="w-full py-20 md:py-28 relative overflow-hidden bg-transparent">
+					<div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#3b82f608_1px,transparent_1px),linear-gradient(to_bottom,#3b82f608_1px,transparent_1px)] bg-[size:24px_24px]" />
+					<div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
+						<div className="flex flex-col items-center space-y-8 text-center">
+							<div className="space-y-6 max-w-4xl">
+								<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-mono text-[10px] mb-4 animate-pulse uppercase tracking-widest font-bold shadow-sm">
+									system_ready
 								</div>
-							</div>
-						</div>
-					</section>
-					<ServicesSection />
-					<PlatformsSection />
-					<IaCToolsSection />
-					<IntegrationsSection />
-					<PricingSection />
-					<section className="w-full py-12 md:py-24 lg:py-32 bg-sage">
-						<div className="container px-4 md:px-6 max-w-6xl mx-auto">
-							<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-moss">
-								Impact & Results
-							</h2>
-							<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-								{/* Performance Improvement */}
-								<div className="flex flex-col items-center p-6 bg-cream rounded-lg shadow-sm">
-									<ArrowUpCircle className="h-12 w-12 text-moss mb-4" />
-									<CountUp
-										end={50}
-										suffix="%"
-										className="text-4xl font-bold text-moss"
-										duration={2.5}
-									/>
-									<p className="text-olive mt-2 text-center">
-										Average Performance Improvement
-									</p>
-								</div>
-
-								{/* Cost Reduction */}
-								<div className="flex flex-col items-center p-6 bg-cream rounded-lg shadow-sm">
-									<LineChart className="h-12 w-12 text-moss mb-4" />
-									<CountUp
-										end={40}
-										suffix="%"
-										className="text-4xl font-bold text-moss"
-										duration={2.5}
-									/>
-									<p className="text-olive mt-2 text-center">
-										Average Cost Reduction
-									</p>
-								</div>
-
-								{/* Servers Managed */}
-								<div className="flex flex-col items-center p-6 bg-cream rounded-lg shadow-sm">
-									<Server className="h-12 w-12 text-moss mb-4" />
-									<CountUp
-										end={1000}
-										prefix=">"
-										className="text-4xl font-bold text-moss"
-										duration={2.5}
-									/>
-									<p className="text-olive mt-2 text-center">
-										Servers | Containers Managed
-									</p>
-								</div>
-
-								{/* Deployment Time */}
-								<div className="flex flex-col items-center p-6 bg-cream rounded-lg shadow-sm">
-									<BarChart className="h-12 w-12 text-moss mb-4" />
-									<CountUp
-										end={50}
-										suffix="%"
-										className="text-4xl font-bold text-moss"
-										duration={2.5}
-									/>
-									<p className="text-olive mt-2 text-center">
-										Faster Deployment Time
-									</p>
-								</div>
-							</div>
-						</div>
-					</section>
-					<section className="w-full py-12 bg-cream">
-						<div className="container px-4 md:px-6 max-w-6xl mx-auto">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
-								{/* Clients Stats */}
-								<div className="p-6 rounded-lg bg-sage">
-									<div className="text-4xl font-bold text-moss mb-2">
-										<Link className="flex items-center justify-center" href="#">
-											<Users className="h-6 w-6 text-moss" />
-											<span className="ml-2 text-2xl font-bold text-moss">
-												25+
-											</span>
-										</Link>
-									</div>
-									<h3 className="text-xl font-semibold text-moss mb-2">
-										Global Clients
-									</h3>
-									<p className="text-olive">
-										From innovative startups to established enterprises, serving
-										clients worldwide
-									</p>
-								</div>
-
-								{/* Projects Stats */}
-								<div className="p-6 rounded-lg bg-sage">
-									<Link className="flex items-center justify-center" href="#">
-										<FolderGit2 className="h-6 w-6 text-moss" />
-										<span className="ml-2 text-2xl font-bold text-moss">
-											50+
+								<div className="min-h-[180px] md:min-h-[220px] flex flex-col items-center justify-center">
+									<h1 className="text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl text-slate-900 flex flex-col items-center justify-center">
+										<span className="block mb-3 font-mono text-xl md:text-2xl uppercase tracking-[0.4em] text-slate-400 font-bold">
+											Cloud Orchestration
 										</span>
-									</Link>
-									<h3 className="text-xl font-semibold text-moss mb-2">
-										Projects Delivered
-									</h3>
-									<p className="text-olive">
-										Successfully completed projects ranging from simple to
-										complex implementations
+										<span className="text-blue-600 font-mono inline-block">
+											<span className="text-slate-300 mr-3 opacity-50">#</span>
+											{displayText}
+											<span className="inline-block w-3 h-10 md:w-5 md:h-16 bg-blue-600 ml-2 animate-pulse align-middle" />
+										</span>
+									</h1>
+								</div>
+								<div className="relative max-w-2xl mx-auto mt-10">
+									<div className="absolute -inset-1 bg-gradient-to-r from-blue-100 to-transparent rounded-[2.5rem] blur opacity-20" />
+									<p className="relative px-10 py-8 bg-white/60 backdrop-blur-md border border-slate-100 rounded-[2.5rem] text-slate-500 font-mono text-sm md:text-base leading-relaxed shadow-xl shadow-blue-900/[0.02] text-center uppercase tracking-tight font-bold">
+										<span className="text-blue-600 mr-2">$</span>
+										Orchestrating production automation, security hardening, and
+										engineering deep-dives at global scale.
 									</p>
 								</div>
 							</div>
 						</div>
-					</section>
-					<section
-						id="why-choose-us"
-						className="w-full py-12 md:py-24 lg:py-32 bg-cream"
-					>
-						<div className="container px-4 md:px-6 max-w-6xl mx-auto">
-							<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-moss">
-								Why Choose CloudFalcon
+					</div>
+				</section>
+
+				<ServicesSection />
+				<PlatformsSection />
+				<IaCToolsSection />
+				<IntegrationsSection />
+				<EcosystemAccordion />
+
+				{/* 0x06 // SYSTEM TELEMETRY */}
+				<section className="w-full py-20 md:py-24 bg-slate-50 relative overflow-hidden border-y border-slate-100">
+					<div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#3b82f608_1px,transparent_1px),linear-gradient(to_bottom,#3b82f608_1px,transparent_1px)] bg-[size:24px_24px]" />
+					<div className="container px-4 md:px-6 max-w-7xl mx-auto relative z-10">
+						<div className="flex flex-col items-center mb-20 text-center">
+							<div className="flex items-center gap-3 mb-4">
+								<div className="w-10 h-px bg-blue-600" />
+								<span className="text-blue-600 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+									Telemetry_Dashboard
+								</span>
+								<div className="w-10 h-px bg-blue-600" />
+							</div>
+							<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-slate-900 font-mono uppercase">
+								<span className="text-slate-400 opacity-50">0x06</span> System
+								Telemetry
 							</h2>
-							<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-								{[
-									"Expert consultants with years of experience",
-									"Tailored solutions for your unique needs",
-									"24/7 support and monitoring",
-									"Proven track record of success",
-									"Cutting-edge technology and best practices",
-									"Significant cost savings for our clients",
-								].map((item) => (
-									<div key={item} className="flex items-center space-x-2">
-										<CheckCircle className="h-6 w-6 text-moss" />
-										<span className="text-olive">{item}</span>
+						</div>
+
+						<div className="grid grid-cols-1 md:grid-cols-6 gap-8">
+							<div className="md:col-span-2 space-y-8">
+								<TelemetryCard
+									id="0x06_A"
+									icon={ArrowUpCircle}
+									value={50}
+									label="Optimization"
+									suffix="%"
+								/>
+								<TelemetryCard
+									id="0x06_B"
+									icon={LineChart}
+									value={40}
+									label="Opex_Reduction"
+									suffix="%"
+								/>
+							</div>
+
+							<div className="md:col-span-2 p-12 bg-white border border-slate-200 rounded-[2.5rem] shadow-2xl shadow-blue-900/[0.05] relative overflow-hidden group flex flex-col justify-center text-center hover:border-blue-400 transition-all duration-500">
+								<div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#2563eb33_1px,transparent_1px),linear-gradient(to_bottom,#2563eb33_1px,transparent_1px)] bg-[size:20px_20px]" />
+								<div className="relative z-10">
+									<div className="mb-8 p-8 rounded-[2rem] bg-blue-600 shadow-xl shadow-blue-600/20 group-hover:rotate-[360deg] transition-transform duration-1000 inline-block">
+										<Network className="h-16 w-14 text-white" />
+									</div>
+									<h3 className="text-slate-900 font-mono text-xl mb-3 uppercase tracking-tighter font-bold">
+										Global Connectivity
+									</h3>
+									<p className="text-blue-600 font-mono text-[10px] animate-pulse font-bold tracking-widest uppercase">
+										Nodes: 100% Online
+									</p>
+									<div className="mt-12 grid grid-cols-2 gap-8 w-full border-t border-slate-50 pt-10">
+										<div>
+											<div className="text-4xl font-bold text-slate-900 font-mono tracking-tighter">
+												25+
+											</div>
+											<div className="text-[8px] text-slate-400 font-mono uppercase tracking-[0.4em] mt-2 font-bold">
+												Clients
+											</div>
+										</div>
+										<div>
+											<div className="text-4xl font-bold text-slate-900 font-mono tracking-tighter">
+												50+
+											</div>
+											<div className="text-[8px] text-slate-400 font-mono uppercase tracking-[0.4em] mt-2 font-bold">
+												Projects
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="md:col-span-2 space-y-8">
+								<TelemetryCard
+									id="0x06_C"
+									icon={Server}
+									value={1000}
+									label="Nodes_Managed"
+									prefix=">"
+								/>
+								<TelemetryCard
+									id="0x06_D"
+									icon={BarChart}
+									value={50}
+									label="Velocity"
+									suffix="%"
+								/>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				{/* 0x07 // THE PIPELINE - GitHub Workflow Style */}
+				<section
+					id="how-we-work"
+					className="w-full py-20 md:py-28 bg-white relative overflow-hidden border-b border-slate-200"
+				>
+					<div className="container px-4 md:px-6 max-w-6xl mx-auto">
+						{/* Header */}
+						<div className="flex flex-col items-center mb-16 text-center">
+							<div className="flex items-center gap-3 mb-4">
+								<div className="w-10 h-px bg-blue-600" />
+								<span className="text-blue-600 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+									Workflow
+								</span>
+								<div className="w-10 h-px bg-blue-600" />
+							</div>
+							<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-slate-900 font-mono uppercase">
+								<span className="text-slate-400 opacity-50">0x07</span> The
+								Pipeline
+							</h2>
+						</div>
+
+						{/* Pipeline Flow */}
+						<div className="relative">
+							{/* Desktop: Horizontal Pipeline */}
+							<div className="hidden lg:flex items-center justify-between relative">
+								{/* Connection Line */}
+								<div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-300 -translate-y-1/2 z-0" />
+
+								{/* Animated Beats */}
+								{[0, 1, 2].map((i) => (
+									<motion.div
+										key={i}
+										className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full z-10 shadow-lg shadow-blue-500/50"
+										animate={{
+											left: ["0%", "100%"],
+											scale: [1, 1.2, 1],
+										}}
+										transition={{
+											duration: 3,
+											repeat: Number.POSITIVE_INFINITY,
+											delay: i * 1,
+											ease: "easeInOut",
+										}}
+									/>
+								))}
+
+								{/* Pipeline Steps */}
+								{pipelineSteps.map((step, index) => (
+									<div
+										key={step.id}
+										className="relative z-10 flex flex-col items-center"
+									>
+										{/* Step Card */}
+										<motion.div
+											initial={{ opacity: 0, y: 20 }}
+											whileInView={{ opacity: 1, y: 0 }}
+											transition={{ delay: index * 0.1 }}
+											viewport={{ once: true }}
+											className="group"
+										>
+											<div className="bg-white border-2 border-slate-200 rounded-xl p-6 w-48 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+												{/* Status Indicator */}
+												<div className="flex items-center justify-between mb-4">
+													<span className="text-[10px] font-mono text-slate-400 uppercase">
+														Step {index + 1}
+													</span>
+													<div className="flex items-center gap-1.5">
+														<div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+														<span className="text-[10px] font-mono text-green-600">
+															Active
+														</span>
+													</div>
+												</div>
+
+												{/* Logo */}
+												<div className="flex justify-center mb-4">
+													<div className="p-3 bg-slate-50 rounded-lg group-hover:bg-blue-50 transition-colors">
+														<Image
+															src={step.img}
+															alt={`${step.tool} logo`}
+															width={40}
+															height={40}
+															className="group-hover:scale-110 transition-transform"
+														/>
+													</div>
+												</div>
+
+												{/* Tool Name */}
+												<h3 className="text-lg font-bold text-slate-900 text-center mb-1">
+													{step.tool}
+												</h3>
+												<p className="text-xs text-slate-500 text-center">
+													{step.description}
+												</p>
+											</div>
+										</motion.div>
+
+										{/* Connector Node */}
+										<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-blue-500 rounded-full z-20" />
+									</div>
+								))}
+							</div>
+
+							{/* Mobile/Tablet: Vertical Pipeline */}
+							<div className="lg:hidden space-y-0">
+								{pipelineSteps.map((step, index) => (
+									<div key={step.id} className="relative flex items-start">
+										{/* Vertical Line */}
+										{index < pipelineSteps.length - 1 && (
+											<div className="absolute left-6 top-14 bottom-0 w-0.5 bg-slate-300">
+												{/* Animated Beat */}
+												<motion.div
+													className="absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50"
+													animate={{ top: ["0%", "100%"] }}
+													transition={{
+														duration: 1.5,
+														repeat: Number.POSITIVE_INFINITY,
+														delay: index * 0.5,
+													}}
+												/>
+											</div>
+										)}
+
+										{/* Node */}
+										<div className="relative z-10 w-12 h-12 flex items-center justify-center">
+											<div className="w-4 h-4 bg-white border-2 border-blue-500 rounded-full" />
+										</div>
+
+										{/* Card */}
+										<motion.div
+											initial={{ opacity: 0, x: -20 }}
+											whileInView={{ opacity: 1, x: 0 }}
+											transition={{ delay: index * 0.1 }}
+											viewport={{ once: true }}
+											className="flex-1 ml-4 mb-8"
+										>
+											<div className="bg-white border border-slate-200 rounded-xl p-4 hover:border-blue-500 hover:shadow-lg transition-all">
+												<div className="flex items-center gap-4">
+													<div className="p-2 bg-slate-50 rounded-lg">
+														<Image
+															src={step.img}
+															alt={`${step.tool} logo`}
+															width={32}
+															height={32}
+														/>
+													</div>
+													<div className="flex-1">
+														<div className="flex items-center gap-2">
+															<h3 className="font-bold text-slate-900">
+																{step.tool}
+															</h3>
+															<div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+														</div>
+														<p className="text-xs text-slate-500">
+															{step.description}
+														</p>
+													</div>
+												</div>
+											</div>
+										</motion.div>
 									</div>
 								))}
 							</div>
 						</div>
-					</section>
-					<section
-						id="how-we-work"
-						className="w-full py-12 md:py-24 lg:py-32 bg-sage"
-					>
-						<div className="container px-4 md:px-6 max-w-6xl mx-auto">
-							<h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-moss">
-								How CloudFalcon Works
-							</h2>
-							<h4 className="text-2xl font-bold text-center mb-8 text-olive">
-								You will be invited to our streamlined process to ensures a
-								seamless experience!
-							</h4>
-							<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-								{/* Slack */}
-								<Link
-									href="https://slack.com/"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex flex-col items-center text-center p-6 bg-sage rounded-lg shadow-sm hover:shadow-md transition-shadow"
-								>
-									<div className="flex flex-col items-center text-center p-6 bg-cream rounded-lg shadow-sm">
-										<Image
-											src="/img/png/slack.png"
-											alt="Slack"
-											width={64}
-											height={64}
-											className="mb-4"
-										/>
-										<h3 className="text-xl font-bold mb-2 text-olive">
-											Communication
-										</h3>
-										<p className="text-olive">
-											Direct access via <strong>Slack</strong> for real-time
-											communication and troubleshooting
-										</p>
-									</div>
-								</Link>
 
-								{/* Linear */}
-								<Link
-									href="https://linear.app/"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex flex-col items-center text-center p-6 bg-sage rounded-lg shadow-sm hover:shadow-md transition-shadow"
-								>
-									<div className="flex flex-col items-center text-center p-6 bg-cream rounded-lg shadow-sm">
-										<Image
-											src="/img/png/linear.png"
-											alt="Linear"
-											width={64}
-											height={64}
-											className="mb-4"
-										/>
-										<h3 className="text-xl font-bold mb-2 text-olive">
-											Task Management
-										</h3>
-										<p className="text-olive">
-											Transparent project tracking and task management through
-											<strong> Linear</strong>
-										</p>
-									</div>
-								</Link>
-								{/* Notion */}
-								<Link
-									href="https://notion.so/"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex flex-col items-center text-center p-6 bg-sage rounded-lg shadow-sm hover:shadow-md transition-shadow"
-								>
-									<div className="flex flex-col items-center text-center p-6 bg-cream rounded-lg shadow-sm">
-										<Image
-											src="/img/png/notion.png"
-											alt="Notion"
-											width={64}
-											height={64}
-											className="mb-4"
-										/>
-										<h3 className="text-xl font-bold mb-2 text-olive">
-											Documentation
-										</h3>
-										<p className="text-olive">
-											Comprehensive documentation and knowledge base in{" "}
-											<strong> Notion</strong>
-										</p>
-									</div>
-								</Link>
-								{/* Github */}
-								<Link
-									href="https://github.com/"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="flex flex-col items-center text-center p-6 bg-sage rounded-lg shadow-sm hover:shadow-md transition-shadow"
-								>
-									<div className="flex flex-col items-center text-center p-6 bg-cream rounded-lg shadow-sm">
-										<Image
-											src="/img/png/github.png"
-											alt="Github"
-											width={64}
-											height={64}
-											className="mb-4"
-										/>
-										<h3 className="text-xl font-bold mb-2 text-olive">
-											Code Access
-										</h3>
-										<p className="text-olive">
-											Secure code access and package management via{" "}
-											<strong> Github</strong>
-										</p>
-									</div>
-								</Link>
+						{/* Summary Stats */}
+						<div className="mt-16 flex justify-center">
+							<div className="inline-flex items-center gap-6 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-sm">
+								<div className="flex items-center gap-2">
+									<div className="w-2 h-2 rounded-full bg-green-500" />
+									<span className="text-sm text-slate-600">
+										All systems operational
+									</span>
+								</div>
+								<div className="w-px h-4 bg-slate-200" />
+								<span className="text-sm text-slate-500">4 active jobs</span>
 							</div>
 						</div>
-					</section>
-					<section
-						id="contact"
-						className="w-full py-12 md:py-24 lg:py-32 bg-olive text-cream"
-					>
-						<div className="container px-4 md:px-6 max-w-6xl mx-auto">
-							<div className="flex flex-col items-center space-y-4 text-center">
-								<div className="space-y-2">
-									<h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-										Ready to Optimize Your Cloud?
-									</h2>
-									<p className="mx-auto max-w-[600px] text-cream/80 md:text-l">
-										Get in touch with our experts and start your cloud
-										optimization journey today.
-									</p>
+					</div>
+				</section>
+
+				<PricingSection />
+
+				{/* 0x09 // CONTACT */}
+				<section
+					id="contact"
+					className="w-full py-20 md:py-28 bg-blue-600 text-white relative overflow-hidden"
+				>
+					<div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:40px_40px]" />
+					<div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
+						<div className="flex flex-col items-center space-y-16 text-center">
+							<div className="space-y-6 max-w-3xl">
+								<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+									uplink_available
 								</div>
-								<div className="w-full max-w-sm space-y-4">
-									<Button
-										className="bg-cream text-olive hover:bg-cream/90"
-										type="button"
-										onClick={handleContactClick}
-									>
-										Email Us
-									</Button>{" "}
-									| Or call us:{" "}
+								<h2 className="text-5xl font-bold tracking-tighter sm:text-8xl font-mono uppercase">
+									<span className="text-blue-200 opacity-50">0x09</span> Ready?
+								</h2>
+							</div>
+							<div className="flex flex-col sm:flex-row items-center gap-12">
+								<Button
+									className="bg-white text-blue-600 hover:bg-blue-50 px-16 py-10 text-2xl font-bold rounded-[2.5rem] shadow-2xl transition-all font-mono uppercase tracking-[0.2em]"
+									type="button"
+									onClick={handleContactClick}
+								>
+									Connect
+								</Button>
+								<div className="flex flex-col items-center sm:items-start">
+									<span className="text-[10px] uppercase tracking-[0.4em] font-mono mb-3 text-blue-100 font-bold">
+										Voice_Protocol
+									</span>
 									<a
 										href="tel:+96890131817"
-										className="text-sm text-cream/80 hover:underline"
+										className="text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
 									>
 										+968 90131817
 									</a>
-									<p className="text-xs text-cream/80">
-										We respect your privacy.
-									</p>
 								</div>
 							</div>
+							<div className="w-full max-w-5xl mx-auto mt-20 relative">
+								<CalendlyWidget />
+							</div>
 						</div>
-					</section>
-				</main>
-				<CalendlyWidget />
-				<Footer />
-			</div>
-		</>
+					</div>
+				</section>
+			</main>
+			<Footer />
+		</div>
 	);
 }

@@ -1,103 +1,45 @@
-import {
-	ChevronDown,
-	Cloud,
-	FileText,
-	Home,
-	Network,
-	Shield,
-	Tag,
-	Wrench,
-} from "lucide-react";
+"use client";
+
+import { BookOpen, Library } from "lucide-react";
 import Link from "next/link";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { usePathname } from "next/navigation";
 
 export default function MainNav() {
-	const pathname =
-		typeof window !== "undefined" ? window.location.pathname : "";
-	// If on homepage, use hash links; otherwise, use absolute links to homepage sections
-	const isHome = pathname === "/";
-	const sectionLink = (hash: string) => (isHome ? hash : `/${hash}`);
+	const _pathname = usePathname();
 
 	return (
 		<nav
-			className="absolute left-1/2 transform -translate-x-1/2 flex gap-6"
+			className="hidden md:flex items-center gap-2 bg-slate-900/5 backdrop-blur-sm border border-slate-900/10 shadow-inner px-2 py-1 rounded-full"
 			aria-label="Main navigation"
 		>
 			<Link
-				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
-				href={sectionLink("#services")}
+				className="px-5 py-2 text-[11px] font-mono font-bold text-slate-500 hover:text-blue-600 transition-all rounded-full hover:bg-white/50 flex items-center gap-3 group"
+				href="/blog"
 			>
-				<Home className="w-4 h-4" /> Services
+				<div className="relative">
+					<div className="absolute inset-0 bg-blue-400/20 blur-md rounded-full scale-0 group-hover:scale-150 transition-transform duration-500" />
+					<BookOpen className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition-colors relative z-10" />
+				</div>
+				<span className="relative z-10">Blog</span>
+				<span className="text-blue-500 opacity-30 group-hover:opacity-100 transition-opacity ml-1">
+					0x01
+				</span>
 			</Link>
+
+			<div className="w-px h-4 bg-slate-900/10 mx-1" />
+
 			<Link
-				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
-				href={sectionLink("#cloud-platforms")}
+				className="px-5 py-2 text-[11px] font-mono font-bold text-slate-500 hover:text-blue-600 transition-all rounded-full hover:bg-white/50 flex items-center gap-3 group"
+				href="/docs"
 			>
-				<Cloud className="w-4 h-4" /> Platforms
-			</Link>
-			<Link
-				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
-				href={sectionLink("#iac-tools")}
-				aria-label="Infrastructure as Code Tools"
-			>
-				<Wrench className="w-4 h-4" /> IaC
-			</Link>
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<button
-						className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1 focus:outline-none"
-						aria-haspopup="true"
-						aria-controls="tools-menu"
-						type="button"
-					>
-						<Cloud className="w-4 h-4" /> Tools{" "}
-						<ChevronDown className="w-4 h-4" />
-					</button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent
-					align="start"
-					id="tools-menu"
-					className="w-48 bg-cream"
-				>
-					<DropdownMenuItem asChild>
-						<Link
-							href="/kubernetes"
-							className="flex items-center gap-2 text-olive hover:text-moss"
-							aria-label="Kubernetes Tools"
-						>
-							<Network className="w-4 h-4" /> Kubernetes
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link
-							href="/security"
-							className="flex items-center gap-2 text-olive hover:text-moss"
-							aria-label="Security Tools"
-						>
-							<Shield className="w-4 h-4" /> Security
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link
-							href="/terraform"
-							className="flex items-center gap-2 text-olive hover:text-moss"
-							aria-label="Terraform Tools"
-						>
-							<FileText className="w-4 h-4" /> Terraform
-						</Link>
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-			<Link
-				className="text-md font-medium text-olive hover:text-moss hover:underline underline-offset-4 flex items-center gap-1"
-				href={sectionLink("#pricing")}
-			>
-				<Tag className="w-4 h-4" /> Pricing
+				<div className="relative">
+					<div className="absolute inset-0 bg-blue-400/20 blur-md rounded-full scale-0 group-hover:scale-150 transition-transform duration-500" />
+					<Library className="w-4 h-4 text-blue-500 group-hover:text-blue-600 transition-colors relative z-10" />
+				</div>
+				<span className="relative z-10">Docs</span>
+				<span className="text-blue-500 opacity-30 group-hover:opacity-100 transition-opacity ml-1">
+					0x02
+				</span>
 			</Link>
 		</nav>
 	);

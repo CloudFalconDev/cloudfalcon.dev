@@ -25,4 +25,10 @@ export const iacTools = [
 		description: "Open source multi-cloud control plane",
 		link: "https://www.crossplane.io/",
 	},
+	{
+		name: "Alchemy",
+		image: "svg/alchemy.svg",
+		description: "Infrastructure as TypeScript for Cloudflare and AWS",
+		link: "https://alchemy.run/",
+	},
 ];

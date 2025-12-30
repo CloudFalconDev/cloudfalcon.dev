@@ -1,71 +1,96 @@
+"use client";
 import { motion } from "framer-motion";
+import { ChevronRight, Cpu } from "lucide-react";
 import { serviceDetails } from "@/data/serviceDetails";
 
 export default function ServicesSection() {
+	// Duplicate for marquee effect
+	const marqueeServices = [...serviceDetails, ...serviceDetails];
+
 	return (
-		<section id="services" className="w-full py-12 md:py-24 lg:py-32 bg-sage">
-			<div className="container px-4 md:px-6 max-w-6xl mx-auto">
-				<motion.h2
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.5 }}
-					className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-moss"
-				>
-					Our Services
-				</motion.h2>
-				<div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-					{serviceDetails.map((service, index) => (
-						<motion.div
-							key={service.title}
-							initial={{ opacity: 0, y: 20 }}
-							whileInView={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.5, delay: index * 0.1 }}
-							whileHover={{ scale: 1.02 }}
-							className="group relative overflow-hidden rounded-xl p-6 bg-cream shadow-lg hover:shadow-xl transition-all duration-300"
-						>
+		<section
+			id="services"
+			className="w-full py-20 bg-white relative overflow-hidden border-b border-slate-100"
+		>
+			{/* Background technical grid */}
+			<div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#3b82f608_1px,transparent_1px),linear-gradient(to_bottom,#3b82f608_1px,transparent_1px)] bg-[size:24px_24px]" />
+
+			<div className="relative z-10">
+				<div className="container px-4 md:px-6 max-w-7xl mx-auto mb-16 text-center">
+					<div className="flex flex-col items-center">
+						<div className="flex items-center gap-3 mb-4">
+							<div className="w-10 h-px bg-blue-600" />
+							<span className="text-blue-600 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+								Core_Capabilities
+							</span>
+							<div className="w-10 h-px bg-blue-600" />
+						</div>
+						<h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-slate-900 font-mono uppercase">
+							<span className="text-slate-400 opacity-50">0x01</span>{" "}
+							Engineering Core
+						</h2>
+					</div>
+				</div>
+
+				{/* Marquee Container */}
+				<div className="flex overflow-hidden group">
+					<motion.div
+						className="flex gap-8 px-4"
+						animate={{ x: ["0%", "-50%"] }}
+						transition={{ duration: 40, ease: "linear", repeat: Infinity }}
+						whileHover={{ animationPlayState: "paused" }}
+					>
+						{marqueeServices.map((service, idx) => (
 							<div
-								className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
-							/>
-							<div className="relative z-10 space-y-4">
-								<div className="mb-4 p-3 rounded-full bg-sage inline-block">
-									{service.icon}
-								</div>
-								<h3 className="text-xl font-bold group-hover:text-moss transition-colors text-olive">
-									{service.title}
-								</h3>
-								<p className="text-olive group-hover:text-olive/80 transition-colors">
-									{service.description}
-								</p>
-								<div className="py-4 border-t border-sage">
-									<div className="flex items-center justify-between mb-4">
-										<span className="text-3xl font-bold text-moss">
-											{service.stats.value}
-										</span>
-										<span className="text-sm text-olive">
-											{service.stats.label}
-										</span>
+								key={`${service.title}-${idx}`}
+								className="flex flex-col p-10 bg-white border border-slate-200 rounded-[2.5rem] shadow-xl shadow-blue-900/[0.02] w-[320px] shrink-0 hover:shadow-2xl hover:border-blue-400 transition-all duration-500 group/card relative overflow-hidden"
+							>
+								{/* Metadata Header */}
+								<div className="w-full flex justify-between items-start mb-10 font-mono text-[9px] text-slate-400">
+									<span className="uppercase tracking-widest text-blue-600 font-bold tracking-[0.2em]">
+										Cap_0x0{(idx % serviceDetails.length) + 1}
+									</span>
+									<div className="flex gap-1">
+										<div className="w-1.5 h-1.5 rounded-full bg-blue-500/20" />
+										<div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
 									</div>
 								</div>
-								<ul className="space-y-3">
-									{service.features.map((feature) => (
-										<li
-											key={feature.text}
-											className="flex items-center text-olive"
-										>
-											<span className="mr-2 text-moss">{feature.icon}</span>
-											{feature.text}
-										</li>
-									))}
-								</ul>
-								<motion.div
-									className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-moss to-sage"
-									initial={{ width: "0%" }}
-									whileHover={{ width: "100%" }}
-									transition={{ duration: 0.3 }}
-								/>
+
+								<div className="flex-1">
+									<div className="mb-10 p-6 rounded-[1.5rem] bg-blue-50 text-blue-600 group-hover/card:bg-blue-600 group-hover/card:text-white transition-all duration-700 inline-block shadow-sm">
+										<div className="scale-150">{service.icon}</div>
+									</div>
+
+									<h3 className="text-xl font-bold mb-4 font-mono tracking-tight text-slate-900 group-hover/card:text-blue-600 transition-colors uppercase">
+										{service.title}
+									</h3>
+
+									<p className="text-[11px] leading-relaxed text-slate-500 font-bold uppercase tracking-tight line-clamp-3">
+										{service.description}
+									</p>
+								</div>
+
+								<div className="mt-10 w-full pt-8 border-t border-slate-50 flex justify-between items-center">
+									<div className="flex flex-col">
+										<span className="text-[8px] font-mono uppercase tracking-widest text-slate-400 mb-1 font-bold">
+											Impact
+										</span>
+										<span className="text-3xl font-bold font-mono text-blue-600">
+											{service.stats.value}
+										</span>
+									</div>
+									<div className="p-2 bg-slate-50 rounded-xl text-slate-400 group-hover/card:text-blue-600 transition-colors">
+										<ChevronRight className="w-5 h-5" />
+									</div>
+								</div>
+
+								{/* Decorative Corner Accent */}
+								<div className="absolute -bottom-2 -right-2 opacity-0 group-hover/card:opacity-5 transition-opacity text-blue-600">
+									<Cpu className="w-24 h-24 rotate-12" />
+								</div>
 							</div>
-						</motion.div>
-					))}
+						))}
+					</motion.div>
 				</div>
 			</div>
 		</section>

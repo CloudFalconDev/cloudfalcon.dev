@@ -1,37 +1,25 @@
-# UI Color Palette
+# CloudFalcon UI Color Palette
 
-Use this earth-tone color palette for all UI/UX work in this project.
-
-## Colors
+Professional White & Blue theme for a modern cloud consultancy.
 
 | Name | Hex | Usage |
-|------|-----|-------|
-| Cream | `#F1F3E0` | Background, light surfaces |
-| Sage | `#D2DCB6` | Secondary background, cards |
-| Moss | `#A1BC98` | Accent, buttons, highlights |
-| Olive | `#778873` | Text, icons, dark elements |
+| :--- | :--- | :--- |
+| `white` | `#FFFFFF` | Main Background |
+| `slate-50` | `#F8FAFC` | Section Backgrounds, Card Backgrounds |
+| `blue-600` | `#2563EB` | Primary Actions, Icons, Brand Accents |
+| `slate-900` | `#0F172A` | Primary Headings |
+| `slate-600` | `#475569` | Body Text |
 
-## Tailwind CSS Classes
+## CSS Variables (Tailwind v4)
 
-When using these colors in components, apply them as:
-
-```css
-/* In globals.css @theme */
---color-cream: #F1F3E0;
---color-sage: #D2DCB6;
---color-moss: #A1BC98;
---color-olive: #778873;
-```
+- `--color-cream`: `#FFFFFF` (Mapped to white)
+- `--color-sage`: `#F8FAFC` (Mapped to slate-50)
+- `--color-moss`: `#2563EB` (Mapped to blue-600)
+- `--color-olive`: `#1E293B` (Mapped to slate-800 for text)
 
 ## Usage Guidelines
 
-- **Backgrounds**: Use `cream` for main backgrounds, `sage` for sections/cards
-- **Primary Actions**: Use `moss` for buttons and interactive elements
-- **Text**: Use `olive` for body text and icons
-- **Contrast**: Pair `cream` backgrounds with `olive` text for readability
-
-## Accessibility
-
-- Ensure text contrast ratio meets WCAG 2.1 AA (4.5:1 for normal text)
-- `olive` on `cream` passes contrast requirements
-- For small text on `moss` backgrounds, use `#333` or darker
+- **Backgrounds**: Use `white` for primary areas, `slate-50` for secondary sections.
+- **Primary Actions**: Use `blue-600` (`moss`) for buttons and interactive elements.
+- **Text**: Use `slate-900` for headings and `slate-600` for body text.
+- **Contrast**: High contrast blue-on-white for maximum readability and accessibility.
