@@ -1,6 +1,13 @@
+---
+title: Harbor Registry
+sidebar_position: 1
+---
+
 # Harbor
 
-- :fontawesome-brands-github: @goharbor/harbor
+> **GitHub**
+>
+> [@goharbor/harbor](https://github.com/goharbor/harbor)
 
 ## Demo with Helm and Minikube
 

@@ -1,11 +1,15 @@
+---
+title: Brew Utils
+sidebar_position: 1
+---
+
 # Brew Utils
 
-## octant
+## Octant
 
-!!! info
-Octant is an open source developer-centric web interface for Kubernetes that lets you inspect a Kubernetes cluster and its applications.
+> Octant is an open source developer-centric web interface for Kubernetes that lets you inspect a Kubernetes cluster and its applications.
 
-- :fontawesome-brands-github: @vmware-tanzu/octant
+**GitHub:** [@vmware-tanzu/octant](https://github.com/vmware-tanzu/octant)
 
 ```bash
 brew install octant
@@ -14,10 +18,9 @@ octant
 
 ## WTF
 
-!!! info
-The terminal dashboard https://wtfutil.com/
+> The terminal dashboard - [wtfutil.com](https://wtfutil.com/)
 
-- :fontawesome-brands-github: @wtfutil/wtf
+**GitHub:** [@wtfutil/wtf](https://github.com/wtfutil/wtf)
 
 ```bash
 brew tap wtfutil/wtfutil

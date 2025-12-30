@@ -1,7 +1,13 @@
+---
+title: DevSecOps Journey
+sidebar_position: 3
+---
+
 # Journey to DevOps with security in mind
 
-!!! info
-    Set up  AWS account with the secure baseline configuration based on CIS Amazon Web Services Foundations and AWS Foundational Security Best Practices.
+> **Info**
+>
+> Set up AWS account with the secure baseline configuration based on CIS Amazon Web Services Foundations and AWS Foundational Security Best Practices.
 
 ## AWS Secure Multi Environments
 

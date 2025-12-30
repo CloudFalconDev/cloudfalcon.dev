@@ -1,10 +1,17 @@
+---
+title: Diagrams
+sidebar_position: 1
+---
+
 # Diagrams
 
-:fontawesome-brands-github: @mingrammer/diagrams
+> **GitHub**
+>
+> [@mingrammer/diagrams](https://github.com/mingrammer/diagrams)
 
-Add HashiCorp missing Icons from https://www.hashicorp.com/brand
+Add HashiCorp missing Icons from [hashicorp.com/brand](https://www.hashicorp.com/brand)
 
 - Waypoint
 - Packer
 - Vagrant
-- boundary
+- Boundary

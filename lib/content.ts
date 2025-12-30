@@ -23,8 +23,15 @@ export interface DocPage {
 export interface SidebarItem {
 	type: "category" | "doc";
 	name: string;
+	label?: string;
 	href?: string;
+	position?: number;
 	children?: SidebarItem[];
+}
+
+interface CategoryConfig {
+	label?: string;
+	position?: number;
 }
 
 // --- Configuration ---
@@ -179,6 +186,28 @@ export async function getDocPage(slug?: string[]): Promise<DocPage | null> {
 	}
 }
 
+// Helper to read category config
+async function getCategoryConfig(dir: string): Promise<CategoryConfig | null> {
+	try {
+		const configPath = path.join(dir, "_category_.json");
+		const content = await fs.readFile(configPath, "utf8");
+		return JSON.parse(content) as CategoryConfig;
+	} catch {
+		return null;
+	}
+}
+
+// Helper to get frontmatter position from a doc file
+async function getDocPosition(filePath: string): Promise<number | undefined> {
+	try {
+		const content = await fs.readFile(filePath, "utf8");
+		const { data } = grayMatter(content);
+		return data.sidebar_position;
+	} catch {
+		return undefined;
+	}
+}
+
 // Recursive Sidebar Builder
 export async function getDocsStructure(
 	dir: string = DOCS_DIR,
@@ -200,14 +229,19 @@ export async function getDocsStructure(
 					`${baseRoute}/${entry.name}`,
 				);
 				if (children.length > 0) {
+					// Get the category config for the subdirectory
+					const subCategoryConfig = await getCategoryConfig(fullPath);
 					structure.push({
 						type: "category",
 						name: entry.name,
+						label: subCategoryConfig?.label,
+						position: subCategoryConfig?.position,
 						children,
 					});
 				}
 			} else if (entry.name.endsWith(".md") || entry.name.endsWith(".mdx")) {
 				const name = entry.name.replace(/\.mdx?$/, "");
+				const position = await getDocPosition(fullPath);
 
 				let href = `${baseRoute}/${name}`;
 				// Handle root intro
@@ -219,12 +253,22 @@ export async function getDocsStructure(
 					type: "doc",
 					name: name,
 					href: href,
+					position: position,
 				});
 			}
 		}
 
-		// Basic alphabetical sort
-		return structure.sort((a, b) => a.name.localeCompare(b.name));
+		// Sort by position first, then alphabetically
+		return structure.sort((a, b) => {
+			// Items with position come first
+			if (a.position !== undefined && b.position !== undefined) {
+				return a.position - b.position;
+			}
+			if (a.position !== undefined) return -1;
+			if (b.position !== undefined) return 1;
+			// Fall back to alphabetical
+			return a.name.localeCompare(b.name);
+		});
 	} catch (_e) {
 		return [];
 	}

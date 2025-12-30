@@ -1,25 +1,27 @@
+---
+title: AWS Multi Account Setup
+sidebar_position: 1
+---
+
 # AWS Multi Account Setup
 
 ![AWS ORG](/images/docs/diagrams/aws_multi_account.png)
 
 ## 0 - Install DevOps tools
 
-!!! note "Action"
-     [manual/local]
+> **Action:** manual/local
 
 [Tools](../devops/tools.md)
 
 ## 1 - Create new IAM User for Terraform Ops
 
-!!! note "Action"
-     [manual/AWS Master Account]
+> **Action:** manual/AWS Master Account
 
-:fontawesome-brands-aws: [https://console.aws.amazon.com/iam/](https://console.aws.amazon.com/iam/)
+[AWS IAM Console](https://console.aws.amazon.com/iam/)
 
 ## 2 - Config aws-vault
 
-!!! note "Action"
-     [manual/local]
+> **Action:** manual/local
 
 ```bash
 aws-vault add XYZ-master
@@ -27,8 +29,7 @@ aws-vault add XYZ-master
 
 ## 3 - Terraform backend
 
-!!! note "Action"
-     [Terraform/local]
+> **Action:** Terraform/local
 
 Bootstrap new AWS Accounts and creates Terraform Backend resources.
 
@@ -48,8 +49,7 @@ tfenv install
 
 ## 4 - Master Account => Organization and Accounts
 
-!!! note "Action"
-     [Terraform/local]
+> **Action:** Terraform/local
 
 - Create repo: XYZ-terraform-master
 - repo clone
@@ -68,26 +68,23 @@ tfenv install
 
 ## 5 - Master Account - Enable SSO
 
-!!! note "Action"
-     [Master Account/Manual]
+> **Action:** Master Account/Manual
 
 Enable SSO using AWS Console
 
-:fontawesome-brands-aws: [https://console.aws.amazon.com/sso/](https://console.aws.amazon.com/sso/)
+[AWS SSO Console](https://console.aws.amazon.com/sso/)
 
 ## 6 - Master Account - Create Users and Groups in SSO
 
-!!! note "Action"
-     [Master Account/Manual]
+> **Action:** Master Account/Manual
 
 Create SSO groups and users
 
-:fontawesome-brands-aws: [https://console.aws.amazon.com/sso/](https://console.aws.amazon.com/sso/)
+[AWS SSO Console](https://console.aws.amazon.com/sso/)
 
 ## 7 - Master Account - SSO Permissions
 
-!!! note "Action"
-     [CloudFormation/local]
+> **Action:** CloudFormation/local
 
 Since AWS SSO is not yet supported with Terraform, Use CFN to configure SSO Permission sets and Assignments.
 
@@ -96,8 +93,7 @@ Since AWS SSO is not yet supported with Terraform, Use CFN to configure SSO Perm
 
 ## 8 - Master Account - Route53
 
-!!! note "Action"
-     [Terraform/local]
+> **Action:** Terraform/local
 
 Create Route53 top level domain `example.com`. Migrate old zone if exist.
 
@@ -110,7 +106,6 @@ If you are using CodeCommit to version IaC, create the repos with Terraform, the
 ```bash
 cloud-nuke defaults-aws
 ```
-
 
 ## 11 - Deploy Network Stack for Prod Account
 
