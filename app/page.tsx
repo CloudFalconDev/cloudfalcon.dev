@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import CalendlyWidget from "@/components/CalendlyWidget";
+import BookingTerminal from "@/components/BookingTerminal";
 import EcosystemAccordion from "@/components/EcosystemAccordion";
 import Footer from "@/components/Footer";
 import GeometricBackground from "@/components/GeometricBackground";
@@ -25,6 +25,7 @@ import TelemetryCard from "@/components/TelemetryCard";
 import { Button } from "@/components/ui/button";
 import { pipelineSteps } from "@/data/pipelineSteps";
 import { handleContactClick } from "@/lib/contact";
+import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 const TAGLINES = [
 	"Ship faster with IaC in the same language you use",
@@ -41,6 +42,9 @@ export default function CloudFalconLanding() {
 	const [displayText, setDisplayText] = useState("");
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [speed, setTypingSpeed] = useState(100);
+	const isMobile = useIsMobile();
+	const prefersReducedMotion = usePrefersReducedMotion();
+	const shouldAnimate = !isMobile && !prefersReducedMotion;
 
 	useEffect(() => {
 		const handleTyping = () => {
@@ -101,6 +105,8 @@ export default function CloudFalconLanding() {
 						</div>
 					</div>
 				</section>
+
+				<BookingTerminal />
 
 				<ServicesSection />
 				<PlatformsSection />
@@ -225,23 +231,24 @@ export default function CloudFalconLanding() {
 								{/* Connection Line */}
 								<div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-300 -translate-y-1/2 z-0" />
 
-								{/* Animated Beats */}
-								{[0, 1, 2].map((i) => (
-									<motion.div
-										key={i}
-										className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full z-10 shadow-lg shadow-blue-500/50"
-										animate={{
-											left: ["0%", "100%"],
-											scale: [1, 1.2, 1],
-										}}
-										transition={{
-											duration: 3,
-											repeat: Number.POSITIVE_INFINITY,
-											delay: i * 1,
-											ease: "easeInOut",
-										}}
-									/>
-								))}
+								{/* Animated Beats - only on desktop */}
+								{shouldAnimate &&
+									[0, 1, 2].map((i) => (
+										<motion.div
+											key={i}
+											className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full z-10 shadow-lg shadow-blue-500/50"
+											animate={{
+												left: ["0%", "100%"],
+												scale: [1, 1.2, 1],
+											}}
+											transition={{
+												duration: 3,
+												repeat: Number.POSITIVE_INFINITY,
+												delay: i * 1,
+												ease: "easeInOut",
+											}}
+										/>
+									))}
 
 								{/* Pipeline Steps */}
 								{pipelineSteps.map((step, index) => (
@@ -307,16 +314,8 @@ export default function CloudFalconLanding() {
 										{/* Vertical Line */}
 										{index < pipelineSteps.length - 1 && (
 											<div className="absolute left-6 top-14 bottom-0 w-0.5 bg-slate-300">
-												{/* Animated Beat */}
-												<motion.div
-													className="absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50"
-													animate={{ top: ["0%", "100%"] }}
-													transition={{
-														duration: 1.5,
-														repeat: Number.POSITIVE_INFINITY,
-														delay: index * 0.5,
-													}}
-												/>
+												{/* Static dot instead of animated beat on mobile */}
+												<div className="absolute left-1/2 -translate-x-1/2 top-1/2 w-2 h-2 bg-blue-500 rounded-full" />
 											</div>
 										)}
 
@@ -396,9 +395,9 @@ export default function CloudFalconLanding() {
 									<span className="text-blue-200 opacity-50">0x09</span> Ready?
 								</h2>
 							</div>
-							<div className="flex flex-col sm:flex-row items-center gap-12">
+							<div className="flex flex-col sm:flex-row items-center gap-8 md:gap-12">
 								<Button
-									className="bg-white text-blue-600 hover:bg-blue-50 px-16 py-10 text-2xl font-bold rounded-[2.5rem] shadow-2xl transition-all font-mono uppercase tracking-[0.2em]"
+									className="bg-white text-blue-600 hover:bg-blue-50 px-12 md:px-16 py-8 md:py-10 text-xl md:text-2xl font-bold rounded-[2.5rem] shadow-2xl transition-all font-mono uppercase tracking-[0.2em]"
 									type="button"
 									onClick={handleContactClick}
 								>
@@ -410,14 +409,28 @@ export default function CloudFalconLanding() {
 									</span>
 									<a
 										href="tel:+96890131817"
-										className="text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
+										className="text-2xl md:text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
 									>
 										+968 90131817
 									</a>
 								</div>
 							</div>
-							<div className="w-full max-w-5xl mx-auto mt-20 relative">
-								<CalendlyWidget />
+							<div className="mt-12 md:mt-16 pt-8 border-t border-blue-500/30 w-full max-w-lg mx-auto">
+								<p className="font-mono text-[10px] text-blue-200 uppercase tracking-wider text-center mb-4">
+									Or schedule directly via the booking terminal above
+								</p>
+								<div className="flex justify-center gap-4">
+									<button
+										type="button"
+										onClick={() =>
+											window.scrollTo({ top: 0, behavior: "smooth" })
+										}
+										className="font-mono text-xs text-white/80 hover:text-white px-4 py-2 border border-blue-400/30 rounded-lg hover:border-blue-400 transition-all flex items-center gap-2"
+									>
+										<span className="text-blue-300">$</span>
+										scroll_to_top()
+									</button>
+								</div>
 							</div>
 						</div>
 					</div>

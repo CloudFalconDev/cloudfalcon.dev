@@ -3,8 +3,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { integrations } from "@/data/integrations";
+import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 export default function IntegrationsSection() {
+	const isMobile = useIsMobile();
+	const prefersReducedMotion = usePrefersReducedMotion();
+	const shouldAnimate = !isMobile && !prefersReducedMotion;
+
 	// Duplicate integrations for seamless loop
 	const marqueeIntegrations = [...integrations, ...integrations];
 
@@ -33,12 +38,21 @@ export default function IntegrationsSection() {
 					</div>
 				</div>
 
-				<div className="flex overflow-hidden group">
+				<div
+					className={`flex overflow-hidden ${shouldAnimate ? "group" : "overflow-x-auto"}`}
+				>
 					<motion.div
 						className="flex gap-8 px-4"
-						animate={{ x: ["0%", "-50%"] }}
-						transition={{ duration: 40, ease: "linear", repeat: Infinity }}
-						whileHover={{ animationPlayState: "paused" }}
+						animate={shouldAnimate ? { x: ["0%", "-50%"] } : undefined}
+						transition={
+							shouldAnimate
+								? {
+										duration: 40,
+										ease: "linear",
+										repeat: Number.POSITIVE_INFINITY,
+									}
+								: undefined
+						}
 					>
 						{marqueeIntegrations.map((integration, idx) => (
 							<Link

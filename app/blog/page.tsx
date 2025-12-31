@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import MainNav from "@/components/MainNav";
 import { getAllBlogPosts } from "@/lib/content";
+
+export const metadata: Metadata = {
+	title: "Blog | CloudFalcon - Technical Intelligence",
+	description:
+		"Technical insights, cloud engineering tutorials, and DevOps best practices from the CloudFalcon team. Explore IaC, Kubernetes, AWS, and more.",
+	openGraph: {
+		title: "Blog | CloudFalcon - Technical Intelligence",
+		description:
+			"Technical insights, cloud engineering tutorials, and DevOps best practices from the CloudFalcon team.",
+		type: "website",
+	},
+};
 
 export default async function BlogIndex() {
 	const posts = await getAllBlogPosts();

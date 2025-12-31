@@ -4,8 +4,13 @@ import { ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { iacTools } from "@/data/iacTools";
+import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 export default function IaCToolsSection() {
+	const isMobile = useIsMobile();
+	const prefersReducedMotion = usePrefersReducedMotion();
+	const shouldAnimate = !isMobile && !prefersReducedMotion;
+
 	// Duplicate tools for seamless loop
 	const marqueeTools = [...iacTools, ...iacTools];
 
@@ -38,12 +43,21 @@ export default function IaCToolsSection() {
 				</div>
 
 				{/* Marquee Container */}
-				<div className="flex overflow-hidden group">
+				<div
+					className={`flex overflow-hidden ${shouldAnimate ? "group" : "overflow-x-auto"}`}
+				>
 					<motion.div
 						className="flex gap-8 px-4"
-						animate={{ x: ["0%", "-50%"] }}
-						transition={{ duration: 40, ease: "linear", repeat: Infinity }}
-						whileHover={{ animationPlayState: "paused" }}
+						animate={shouldAnimate ? { x: ["0%", "-50%"] } : undefined}
+						transition={
+							shouldAnimate
+								? {
+										duration: 40,
+										ease: "linear",
+										repeat: Number.POSITIVE_INFINITY,
+									}
+								: undefined
+						}
 					>
 						{marqueeTools.map((tool, idx) => (
 							<div

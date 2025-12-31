@@ -3,8 +3,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { platforms } from "@/data/platforms";
+import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 export default function PlatformsSection() {
+	const isMobile = useIsMobile();
+	const prefersReducedMotion = usePrefersReducedMotion();
+	const shouldAnimate = !isMobile && !prefersReducedMotion;
+
 	// Duplicate platforms for seamless loop
 	const marqueePlatforms = [...platforms, ...platforms];
 
@@ -26,7 +31,7 @@ export default function PlatformsSection() {
 							</span>
 							<div className="w-10 h-px bg-blue-600" />
 						</div>
-						<h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-blue-600 font-mono uppercase">
+						<h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tighter text-slate-900 font-mono uppercase">
 							<span className="text-slate-400 opacity-50">0x02</span> Cloud
 							Platforms
 						</h2>
@@ -34,12 +39,21 @@ export default function PlatformsSection() {
 				</div>
 
 				{/* Marquee Container */}
-				<div className="flex overflow-hidden group">
+				<div
+					className={`flex overflow-hidden ${shouldAnimate ? "group" : "overflow-x-auto"}`}
+				>
 					<motion.div
 						className="flex gap-8 px-4"
-						animate={{ x: ["0%", "-50%"] }}
-						transition={{ duration: 40, ease: "linear", repeat: Infinity }}
-						whileHover={{ animationPlayState: "paused" }}
+						animate={shouldAnimate ? { x: ["0%", "-50%"] } : undefined}
+						transition={
+							shouldAnimate
+								? {
+										duration: 40,
+										ease: "linear",
+										repeat: Number.POSITIVE_INFINITY,
+									}
+								: undefined
+						}
 					>
 						{marqueePlatforms.map((platform, idx) => (
 							<Link

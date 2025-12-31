@@ -6,7 +6,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 declare global {
 	interface Window {
-		Calendly: any;
+		Calendly?: {
+			initInlineWidget: (options: {
+				url: string;
+				parentElement: HTMLElement;
+				resize?: boolean;
+				pageSettings?: {
+					backgroundColor?: string;
+					hideEventTypeDetails?: boolean;
+					hideLandingPageDetails?: boolean;
+					primaryColor?: string;
+					textColor?: string;
+				};
+			}) => void;
+		};
 	}
 }
 
@@ -25,7 +38,7 @@ const CalendlyWidget = () => {
 	const [logIndex, setLogIndex] = useState(0);
 
 	const initCalendly = useCallback(() => {
-		if (window.Calendly && containerRef.current) {
+		if (window.Calendly?.initInlineWidget && containerRef.current) {
 			containerRef.current.innerHTML = "";
 			window.Calendly.initInlineWidget({
 				url: "https://calendly.com/mohammed-cloudfalcon/30min",

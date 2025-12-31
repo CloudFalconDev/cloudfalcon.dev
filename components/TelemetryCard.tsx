@@ -2,6 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import CountUp from "react-countup";
+import { usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 interface TelemetryCardProps {
 	id: string;
@@ -20,6 +21,8 @@ export default function TelemetryCard({
 	suffix = "",
 	prefix = "",
 }: TelemetryCardProps) {
+	const prefersReducedMotion = usePrefersReducedMotion();
+
 	return (
 		<div className="flex flex-col items-center p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-blue-900/[0.02] relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:border-blue-400 hover:-translate-y-1">
 			<div className="absolute top-4 right-8 font-mono text-[9px] text-slate-300 tracking-widest font-bold uppercase">
@@ -32,11 +35,19 @@ export default function TelemetryCard({
 						{prefix}
 					</span>
 				)}
-				<CountUp
-					end={value}
-					className="text-5xl font-bold text-slate-900 font-mono tracking-tighter"
-					duration={2.5}
-				/>
+				{prefersReducedMotion ? (
+					<span className="text-5xl font-bold text-slate-900 font-mono tracking-tighter">
+						{value}
+					</span>
+				) : (
+					<CountUp
+						end={value}
+						className="text-5xl font-bold text-slate-900 font-mono tracking-tighter"
+						duration={2}
+						enableScrollSpy
+						scrollSpyOnce
+					/>
+				)}
 				{suffix && (
 					<span className="text-2xl font-bold text-blue-600 font-mono">
 						{suffix}
@@ -47,7 +58,7 @@ export default function TelemetryCard({
 				{label}
 			</p>
 			<div className="mt-8 w-full h-1 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
-				<div className="h-full bg-blue-600 w-[60%] group-hover:w-full transition-all duration-1000 animate-pulse" />
+				<div className="h-full bg-blue-600 w-[60%] group-hover:w-full transition-all duration-1000" />
 			</div>
 		</div>
 	);

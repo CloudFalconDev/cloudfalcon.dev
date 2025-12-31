@@ -2,8 +2,13 @@
 import { motion } from "framer-motion";
 import { ChevronRight, Cpu } from "lucide-react";
 import { serviceDetails } from "@/data/serviceDetails";
+import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 export default function ServicesSection() {
+	const isMobile = useIsMobile();
+	const prefersReducedMotion = usePrefersReducedMotion();
+	const shouldAnimate = !isMobile && !prefersReducedMotion;
+
 	// Duplicate for marquee effect
 	const marqueeServices = [...serviceDetails, ...serviceDetails];
 
@@ -33,12 +38,21 @@ export default function ServicesSection() {
 				</div>
 
 				{/* Marquee Container */}
-				<div className="flex overflow-hidden group">
+				<div
+					className={`flex overflow-hidden ${shouldAnimate ? "group" : "overflow-x-auto"}`}
+				>
 					<motion.div
 						className="flex gap-8 px-4"
-						animate={{ x: ["0%", "-50%"] }}
-						transition={{ duration: 40, ease: "linear", repeat: Infinity }}
-						whileHover={{ animationPlayState: "paused" }}
+						animate={shouldAnimate ? { x: ["0%", "-50%"] } : undefined}
+						transition={
+							shouldAnimate
+								? {
+										duration: 40,
+										ease: "linear",
+										repeat: Number.POSITIVE_INFINITY,
+									}
+								: undefined
+						}
 					>
 						{marqueeServices.map((service, idx) => (
 							<div
