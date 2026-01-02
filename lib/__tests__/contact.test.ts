@@ -15,7 +15,9 @@ describe("handleContactClick", () => {
 		expect(mockLocation.href).toContain("mailto:info@cloudfalcon.dev");
 		expect(mockLocation.href).toContain("subject=");
 		expect(mockLocation.href).toContain("body=");
-		expect(mockLocation.href).toContain("CloudFalcon Dev Services Inquiry");
+		expect(mockLocation.href).toContain(
+			encodeURIComponent("CloudFalcon Dev Services Inquiry"),
+		);
 	});
 
 	it("should URL encode special characters", () => {
