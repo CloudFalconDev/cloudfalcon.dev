@@ -6,18 +6,12 @@ export function useIsMobile() {
 	const [isMobile, setIsMobile] = useState(false);
 
 	useEffect(() => {
-		const checkMobile = () => {
-			setIsMobile(
-				window.innerWidth < 768 ||
-					/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-						navigator.userAgent,
-					),
-			);
-		};
+		const mediaQuery = window.matchMedia("(max-width: 767px)");
+		const updateIsMobile = () => setIsMobile(mediaQuery.matches);
 
-		checkMobile();
-		window.addEventListener("resize", checkMobile);
-		return () => window.removeEventListener("resize", checkMobile);
+		updateIsMobile();
+		mediaQuery.addEventListener("change", updateIsMobile);
+		return () => mediaQuery.removeEventListener("change", updateIsMobile);
 	}, []);
 
 	return isMobile;

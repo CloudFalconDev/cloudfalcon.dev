@@ -2,17 +2,22 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 
 import localFont from "next/font/local";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import "./globals.css";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
 	variable: "--font-geist-sans",
 	weight: "100 900",
+	display: "swap",
+	preload: true,
 });
 const geistMono = localFont({
 	src: "./fonts/GeistMonoVF.woff",
 	variable: "--font-geist-mono",
 	weight: "100 900",
+	display: "swap",
+	preload: true,
 });
 
 export const metadata: Metadata = {
@@ -79,14 +84,50 @@ export default function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const gaId = process.env.NEXT_PUBLIC_MEASUREMENT_ID;
+
+	// Validate Google Analytics ID format (G-XXXXXXXXXX)
+	const isValidGaId = gaId && /^G-[A-Z0-9]+$/i.test(gaId);
+
+	if (process.env.NODE_ENV === "development" && !isValidGaId && gaId) {
+		console.warn(
+			"Invalid Google Analytics ID format. Expected format: G-XXXXXXXXXX",
+		);
+	}
+
 	return (
 		<html lang="en">
+			<head>
+				{/* Preload critical fonts with fetchPriority */}
+				<link
+					rel="preload"
+					href="/fonts/GeistVF.woff"
+					as="font"
+					type="font/woff"
+					crossOrigin="anonymous"
+					fetchPriority="high"
+				/>
+				<link
+					rel="preload"
+					href="/fonts/GeistMonoVF.woff"
+					as="font"
+					type="font/woff"
+					crossOrigin="anonymous"
+					fetchPriority="high"
+				/>
+				{/* DNS prefetch for external resources */}
+				<link rel="dns-prefetch" href="https://assets.calendly.com" />
+				<link rel="dns-prefetch" href="https://calendly.com" />
+				{/* Preconnect to external domains for faster connection */}
+				<link rel="preconnect" href="https://assets.calendly.com" />
+				<link rel="preconnect" href="https://calendly.com" />
+			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground selection:bg-primary/20`}
 			>
-				{children}
+				<ErrorBoundary>{children}</ErrorBoundary>
 			</body>
-			<GoogleAnalytics gaId={process.env.NEXT_PUBLIC_MEASUREMENT_ID ?? ""} />
+			{isValidGaId && <GoogleAnalytics gaId={gaId} />}
 		</html>
 	);
 }

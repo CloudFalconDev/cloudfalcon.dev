@@ -1,21 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-
-// Check if device is mobile or prefers reduced motion
-const isMobileDevice = () => {
-	if (typeof window === "undefined") return false;
-	return (
-		window.innerWidth < 768 ||
-		/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-			navigator.userAgent,
-		)
-	);
-};
-
-const prefersReducedMotion = () => {
-	if (typeof window === "undefined") return false;
-	return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-};
+import { THREE_CONFIG } from "@/lib/constants";
+import { isMobileDevice, prefersReducedMotion } from "@/lib/device";
 
 function GeometricBackground() {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -71,7 +57,9 @@ function GeometricBackground() {
 		container.appendChild(renderer.domElement);
 
 		// Reduced particle count for better performance
-		const particleCount = isMobile ? 40 : 80;
+		const particleCount = isMobile
+			? THREE_CONFIG.particleCount.mobile
+			: THREE_CONFIG.particleCount.desktop;
 		const particles = new THREE.BufferGeometry();
 		const coords = new Float32Array(particleCount * 3);
 		const velocities = new Float32Array(particleCount * 3);
@@ -115,10 +103,14 @@ function GeometricBackground() {
 		// Pre-allocate array for line positions to reduce GC pressure
 		const maxLines = (particleCount * (particleCount - 1)) / 2;
 		const linePositionsArray = new Float32Array(maxLines * 6);
-		const connectionDistance = isMobile ? 2.0 : 2.5;
+		const connectionDistance = isMobile
+			? THREE_CONFIG.connectionDistance.mobile
+			: THREE_CONFIG.connectionDistance.desktop;
 
 		let frameCount = 0;
-		const frameSkip = isMobile ? 2 : 1; // Skip frames on mobile
+		const frameSkip = isMobile
+			? THREE_CONFIG.frameSkip.mobile
+			: THREE_CONFIG.frameSkip.desktop; // Skip frames on mobile
 
 		const animate = () => {
 			if (!isVisibleRef.current) {
@@ -132,38 +124,70 @@ function GeometricBackground() {
 				return;
 			}
 
-			const positions = particles.attributes.position.array as Float32Array;
+			const positionAttr = particles.attributes.position;
+			if (!positionAttr) return;
+			const positions = positionAttr.array as Float32Array;
 			let lineIndex = 0;
 
 			for (let i = 0; i < particleCount; i++) {
-				positions[i * 3] += velocities[i * 3];
-				positions[i * 3 + 1] += velocities[i * 3 + 1];
-				positions[i * 3 + 2] += velocities[i * 3 + 2];
+				const idx3 = i * 3;
+				const velIdx3 = i * 3;
+				const posX = positions[idx3];
+				const posY = positions[idx3 + 1];
+				const posZ = positions[idx3 + 2];
+				const velX = velocities[velIdx3];
+				const velY = velocities[velIdx3 + 1];
+				const velZ = velocities[velIdx3 + 2];
+
+				if (
+					posX === undefined ||
+					posY === undefined ||
+					posZ === undefined ||
+					velX === undefined ||
+					velY === undefined ||
+					velZ === undefined
+				)
+					continue;
+
+				positions[idx3] = posX + velX;
+				positions[idx3 + 1] = posY + velY;
+				positions[idx3 + 2] = posZ + velZ;
 
 				// Bounce off boundaries
-				if (Math.abs(positions[i * 3]) > 5) velocities[i * 3] *= -1;
-				if (Math.abs(positions[i * 3 + 1]) > 5) velocities[i * 3 + 1] *= -1;
-				if (Math.abs(positions[i * 3 + 2]) > 5) velocities[i * 3 + 2] *= -1;
+				if (Math.abs(positions[idx3]) > 5 && velocities[velIdx3])
+					velocities[velIdx3] *= -1;
+				if (Math.abs(positions[idx3 + 1]) > 5 && velocities[velIdx3 + 1])
+					velocities[velIdx3 + 1] *= -1;
+				if (Math.abs(positions[idx3 + 2]) > 5 && velocities[velIdx3 + 2])
+					velocities[velIdx3 + 2] *= -1;
 
 				// Connect points (use squared distance to avoid sqrt)
 				for (let j = i + 1; j < particleCount; j++) {
-					const dx = positions[i * 3] - positions[j * 3];
-					const dy = positions[i * 3 + 1] - positions[j * 3 + 1];
-					const dz = positions[i * 3 + 2] - positions[j * 3 + 2];
+					const jdx3 = j * 3;
+					const jPosX = positions[jdx3];
+					const jPosY = positions[jdx3 + 1];
+					const jPosZ = positions[jdx3 + 2];
+
+					if (jPosX === undefined || jPosY === undefined || jPosZ === undefined)
+						continue;
+
+					const dx = positions[idx3] - jPosX;
+					const dy = positions[idx3 + 1] - jPosY;
+					const dz = positions[idx3 + 2] - jPosZ;
 					const distSq = dx * dx + dy * dy + dz * dz;
 
 					if (distSq < connectionDistance * connectionDistance) {
-						linePositionsArray[lineIndex++] = positions[i * 3];
-						linePositionsArray[lineIndex++] = positions[i * 3 + 1];
-						linePositionsArray[lineIndex++] = positions[i * 3 + 2];
-						linePositionsArray[lineIndex++] = positions[j * 3];
-						linePositionsArray[lineIndex++] = positions[j * 3 + 1];
-						linePositionsArray[lineIndex++] = positions[j * 3 + 2];
+						linePositionsArray[lineIndex++] = positions[idx3];
+						linePositionsArray[lineIndex++] = positions[idx3 + 1];
+						linePositionsArray[lineIndex++] = positions[idx3 + 2];
+						linePositionsArray[lineIndex++] = jPosX;
+						linePositionsArray[lineIndex++] = jPosY;
+						linePositionsArray[lineIndex++] = jPosZ;
 					}
 				}
 			}
 
-			particles.attributes.position.needsUpdate = true;
+			positionAttr.needsUpdate = true;
 
 			// Update line geometry with only the used portion
 			const usedPositions = linePositionsArray.slice(0, lineIndex);

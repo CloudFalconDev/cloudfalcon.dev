@@ -66,6 +66,7 @@ const CalendlyWidget = () => {
 			}, 600);
 			return () => clearInterval(timer);
 		}
+		return undefined;
 	}, [isInitializing]);
 
 	useEffect(() => {
@@ -118,8 +119,8 @@ const CalendlyWidget = () => {
 								className="absolute inset-0 flex flex-col items-center justify-center bg-white z-20 p-10"
 							>
 								<div className="w-full max-w-sm font-mono text-[10px] text-slate-400 space-y-2">
-									{SYSTEM_LOGS.slice(0, logIndex + 1).map((log, i) => (
-										<div key={i} className="flex gap-3">
+									{SYSTEM_LOGS.slice(0, logIndex + 1).map((log) => (
+										<div key={log} className="flex gap-3">
 											<span className="text-blue-600 shrink-0">[$]</span>
 											<span>{log}</span>
 										</div>

@@ -1,8 +1,38 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import MainNav from "@/components/MainNav";
 import { getBlogPost } from "@/lib/content";
+
+export async function generateMetadata(props: {
+	params: Promise<{ slug: string[] }>;
+}): Promise<Metadata> {
+	const params = await props.params;
+	const post = await getBlogPost(params.slug);
+
+	if (!post) {
+		return {
+			title: "Post Not Found | CloudFalcon Blog",
+		};
+	}
+
+	return {
+		title: `${post.title} | CloudFalcon Blog`,
+		description: post.excerpt || "Technical insights from CloudFalcon",
+		openGraph: {
+			title: post.title,
+			description: post.excerpt || "Technical insights from CloudFalcon",
+			type: "article",
+			publishedTime: post.date || undefined,
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: post.title,
+			description: post.excerpt || "Technical insights from CloudFalcon",
+		},
+	};
+}
 
 export default async function BlogPost(props: {
 	params: Promise<{ slug: string[] }>;

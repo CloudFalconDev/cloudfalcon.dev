@@ -1,7 +1,8 @@
 import { Github, Linkedin, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
+import { memo } from "react";
 
-export default function Footer() {
+function Footer() {
 	return (
 		<>
 			<footer className="w-full py-12 bg-white border-t border-slate-100 relative overflow-hidden">
@@ -124,3 +125,5 @@ export default function Footer() {
 		</>
 	);
 }
+
+export default memo(Footer);

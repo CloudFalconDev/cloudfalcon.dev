@@ -1,15 +1,10 @@
 "use client";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import MarqueeSection from "@/components/MarqueeSection";
 import { integrations } from "@/data/integrations";
-import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
 export default function IntegrationsSection() {
-	const isMobile = useIsMobile();
-	const prefersReducedMotion = usePrefersReducedMotion();
-	const shouldAnimate = !isMobile && !prefersReducedMotion;
-
 	// Duplicate integrations for seamless loop
 	const marqueeIntegrations = [...integrations, ...integrations];
 
@@ -38,61 +33,47 @@ export default function IntegrationsSection() {
 					</div>
 				</div>
 
-				<div
-					className={`flex overflow-hidden ${shouldAnimate ? "group" : "overflow-x-auto"}`}
-				>
-					<motion.div
-						className="flex gap-8 px-4"
-						animate={shouldAnimate ? { x: ["0%", "-50%"] } : undefined}
-						transition={
-							shouldAnimate
-								? {
-										duration: 40,
-										ease: "linear",
-										repeat: Number.POSITIVE_INFINITY,
-									}
-								: undefined
-						}
-					>
-						{marqueeIntegrations.map((integration, idx) => (
-							<Link
-								key={`${integration.name}-${idx}`}
-								href={integration.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex flex-col p-10 bg-white border border-slate-200 rounded-[2.5rem] shadow-xl shadow-blue-900/[0.02] w-[320px] shrink-0 hover:shadow-2xl hover:border-blue-400 transition-all duration-500 group/card relative overflow-hidden"
-							>
-								{/* Metadata Header */}
-								<div className="w-full flex justify-between items-start mb-10 font-mono text-[9px] text-slate-400">
-									<span className="uppercase tracking-widest text-blue-600 font-bold tracking-[0.2em]">
-										EXT_0{(idx % integrations.length) + 1}
-									</span>
-									<div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-								</div>
+				<MarqueeSection>
+					{marqueeIntegrations.map((integration, idx) => (
+						<Link
+							key={`${integration.name}-${idx}`}
+							href={integration.href}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="flex flex-col p-10 bg-white border border-slate-200 rounded-[2.5rem] shadow-xl shadow-blue-900/[0.02] w-[320px] shrink-0 hover:shadow-2xl hover:border-blue-400 transition-all duration-500 group/card relative overflow-hidden"
+						>
+							{/* Metadata Header */}
+							<div className="w-full flex justify-between items-start mb-10 font-mono text-[9px] text-slate-400">
+								<span className="uppercase tracking-widest text-blue-600 font-bold tracking-[0.2em]">
+									EXT_0{(idx % integrations.length) + 1}
+								</span>
+								<div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+							</div>
 
-								<div className="flex-1 flex flex-col items-center justify-center">
-									<div className="h-24 w-full flex items-center justify-center mb-10 relative">
-										<div className="absolute inset-0 bg-blue-500/5 blur-2xl rounded-full scale-0 group-hover/card:scale-150 transition-transform duration-700" />
-										<Image
-											src={integration.logo}
-											alt={integration.alt}
-											width={180}
-											height={72}
-											className="max-h-20 w-auto object-contain grayscale group-hover/card:grayscale-0 transition-all duration-500 scale-110 group-hover/card:scale-125"
-										/>
-									</div>
-									<div className="w-full h-px bg-slate-50 mb-8" />
-									<h3 className="text-xl font-bold mb-3 text-slate-900 font-mono uppercase tracking-tight text-center">
-										{integration.name}
-									</h3>
-									<p className="text-slate-500 text-[11px] leading-relaxed font-bold uppercase tracking-tight line-clamp-3 text-center">
-										{integration.description}
-									</p>
+							<div className="flex-1 flex flex-col items-center justify-center">
+								<div className="h-24 w-full flex items-center justify-center mb-10 relative">
+									<div className="absolute inset-0 bg-blue-500/5 blur-2xl rounded-full scale-0 group-hover/card:scale-150 transition-transform duration-700" />
+									<Image
+										src={integration.logo}
+										alt={integration.alt}
+										width={180}
+										height={72}
+										loading="lazy"
+										sizes="(max-width: 768px) 160px, 180px"
+										className="max-h-20 w-auto object-contain grayscale group-hover/card:grayscale-0 transition-all duration-500 scale-110 group-hover/card:scale-125"
+									/>
 								</div>
-							</Link>
-						))}
-					</motion.div>
-				</div>
+								<div className="w-full h-px bg-slate-50 mb-8" />
+								<h3 className="text-xl font-bold mb-3 text-slate-900 font-mono uppercase tracking-tight text-center">
+									{integration.name}
+								</h3>
+								<p className="text-slate-500 text-[11px] leading-relaxed font-bold uppercase tracking-tight line-clamp-3 text-center">
+									{integration.description}
+								</p>
+							</div>
+						</Link>
+					))}
+				</MarqueeSection>
 			</div>
 		</section>
 	);

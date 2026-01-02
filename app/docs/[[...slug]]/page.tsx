@@ -27,7 +27,9 @@ export async function generateMetadata({
 	return {
 		title: `${doc.title} | CloudFalcon Docs`,
 		description:
-			doc.frontMatter.description || `Documentation for ${doc.title}`,
+			(typeof doc.frontMatter.description === "string"
+				? doc.frontMatter.description
+				: null) || `Documentation for ${doc.title}`,
 	};
 }
 

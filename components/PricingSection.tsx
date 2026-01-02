@@ -1,7 +1,8 @@
 import { CheckCircle } from "lucide-react";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 
-export default function PricingSection() {
+function PricingSection() {
 	return (
 		<section
 			id="pricing"
@@ -46,7 +47,10 @@ export default function PricingSection() {
 								"Next-day engineering response",
 							].map((item) => (
 								<li key={item} className="flex items-start group/item">
-									<CheckCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 shrink-0 transition-transform group-hover/item:scale-110" />
+									<CheckCircle
+										className="h-5 w-5 text-blue-500 mr-3 mt-0.5 shrink-0 transition-transform group-hover/item:scale-110"
+										aria-hidden="true"
+									/>
 									<span className="text-slate-600 text-sm font-bold uppercase tracking-tight leading-relaxed">
 										{item}
 									</span>
@@ -57,12 +61,13 @@ export default function PricingSection() {
 						<div className="pt-8 border-t border-slate-50">
 							<Button
 								variant="outline"
-								className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 rounded-2xl py-8 font-mono text-xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-blue-900/5 transition-all"
+								className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 rounded-2xl py-8 font-mono text-xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-blue-900/5 transition-all min-h-[48px]"
 								onClick={() => {
 									document
 										.getElementById("contact")
 										?.scrollIntoView({ behavior: "smooth" });
 								}}
+								aria-label="Contact us about Standard tier"
 							>
 								Contact Us
 							</Button>
@@ -103,12 +108,13 @@ export default function PricingSection() {
 
 						<div className="pt-8 border-t border-blue-500">
 							<Button
-								className="w-full bg-white text-blue-600 hover:bg-blue-50 rounded-2xl py-8 shadow-xl shadow-blue-900/20 font-mono text-sm font-bold uppercase tracking-[0.2em] transition-transform active:scale-95"
+								className="w-full bg-white text-blue-600 hover:bg-blue-50 rounded-2xl py-8 shadow-xl shadow-blue-900/20 font-mono text-sm font-bold uppercase tracking-[0.2em] transition-transform active:scale-95 min-h-[48px]"
 								onClick={() => {
 									document
 										.getElementById("contact")
 										?.scrollIntoView({ behavior: "smooth" });
 								}}
+								aria-label="Contact us about Managed tier"
 							>
 								Contact Us
 							</Button>
@@ -135,7 +141,10 @@ export default function PricingSection() {
 								"Direct Slack/Discord engineering link",
 							].map((item) => (
 								<li key={item} className="flex items-start group/item">
-									<CheckCircle className="h-5 w-5 text-blue-500 mr-3 mt-0.5 shrink-0 transition-transform group-hover/item:scale-110" />
+									<CheckCircle
+										className="h-5 w-5 text-blue-500 mr-3 mt-0.5 shrink-0 transition-transform group-hover/item:scale-110"
+										aria-hidden="true"
+									/>
 									<span className="text-slate-600 text-sm font-bold uppercase tracking-tight leading-relaxed">
 										{item}
 									</span>
@@ -146,12 +155,13 @@ export default function PricingSection() {
 						<div className="pt-8 border-t border-slate-50">
 							<Button
 								variant="outline"
-								className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 rounded-2xl py-8 font-mono text-xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-blue-900/5 transition-all"
+								className="w-full border-blue-600 text-blue-600 hover:bg-blue-50 rounded-2xl py-8 font-mono text-xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-blue-900/5 transition-all min-h-[48px]"
 								onClick={() => {
 									document
 										.getElementById("contact")
 										?.scrollIntoView({ behavior: "smooth" });
 								}}
+								aria-label="Contact us about Enterprise tier"
 							>
 								Contact Us
 							</Button>
@@ -162,3 +172,5 @@ export default function PricingSection() {
 		</section>
 	);
 }
+
+export default memo(PricingSection);

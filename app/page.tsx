@@ -9,17 +9,12 @@ import {
 	Server,
 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import BookingTerminal from "@/components/BookingTerminal";
-import EcosystemAccordion from "@/components/EcosystemAccordion";
+import { lazy, Suspense } from "react";
 import Footer from "@/components/Footer";
-import GeometricBackground from "@/components/GeometricBackground";
 import Header from "@/components/Header";
-import IaCToolsSection from "@/components/IaCToolsSection";
-import IntegrationsSection from "@/components/IntegrationsSection";
+// Hero section - server-rendered for LCP
+import HeroSectionServer from "@/components/HeroSectionServer";
 import MainNav from "@/components/MainNav";
-import PlatformsSection from "@/components/PlatformsSection";
-import PricingSection from "@/components/PricingSection";
 import ServicesSection from "@/components/ServicesSection";
 import TelemetryCard from "@/components/TelemetryCard";
 import { Button } from "@/components/ui/button";
@@ -27,92 +22,53 @@ import { pipelineSteps } from "@/data/pipelineSteps";
 import { handleContactClick } from "@/lib/contact";
 import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
 
-const TAGLINES = [
-	"Ship faster with IaC in the same language you use",
-	"Kill YAML complexity with Infrastructure as Code",
-	"Deploy Zero-Trust environments programmatically",
-	"Orchestrate multi-cloud nodes at scale",
-	"Reduce cloud burn with automated FinOps",
-	"Implement self-healing system modules",
-	"Orchestrate Kubernetes with pure TypeScript",
-];
+// Lazy load below-fold components
+const BookingTerminal = lazy(() => import("@/components/BookingTerminal"));
+const GeometricBackgroundViewport = lazy(
+	() => import("@/components/GeometricBackgroundViewport"),
+);
+const EcosystemAccordion = lazy(
+	() => import("@/components/EcosystemAccordion"),
+);
+const IaCToolsSection = lazy(() => import("@/components/IaCToolsSection"));
+const IntegrationsSection = lazy(
+	() => import("@/components/IntegrationsSection"),
+);
+const PlatformsSection = lazy(() => import("@/components/PlatformsSection"));
+const PricingSection = lazy(() => import("@/components/PricingSection"));
 
 export default function CloudFalconLanding() {
-	const [index, setIndex] = useState(0);
-	const [displayText, setDisplayText] = useState("");
-	const [isDeleting, setIsDeleting] = useState(false);
-	const [speed, setTypingSpeed] = useState(100);
 	const isMobile = useIsMobile();
 	const prefersReducedMotion = usePrefersReducedMotion();
 	const shouldAnimate = !isMobile && !prefersReducedMotion;
 
-	useEffect(() => {
-		const handleTyping = () => {
-			const fullText = TAGLINES[index];
-			if (!isDeleting) {
-				setDisplayText(fullText.substring(0, displayText.length + 1));
-				setTypingSpeed(50);
-				if (displayText === fullText)
-					setTimeout(() => setIsDeleting(true), 2000);
-			} else {
-				setDisplayText(fullText.substring(0, displayText.length - 1));
-				setTypingSpeed(30);
-				if (displayText === "") {
-					setIsDeleting(false);
-					setIndex((prev) => (prev + 1) % TAGLINES.length);
-				}
-			}
-		};
-		const timer = setTimeout(handleTyping, speed);
-		return () => clearTimeout(timer);
-	}, [displayText, isDeleting, index, speed]);
-
 	return (
 		<div className="flex flex-col min-h-screen relative">
-			<GeometricBackground />
+			<Suspense fallback={null}>
+				<GeometricBackgroundViewport />
+			</Suspense>
 			<Header MainNavComponent={MainNav} />
 			<main className="flex-1 relative z-10">
-				{/* 0x00 // HERO */}
-				<section className="w-full py-20 md:py-28 relative overflow-hidden bg-transparent">
-					<div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,#3b82f608_1px,transparent_1px),linear-gradient(to_bottom,#3b82f608_1px,transparent_1px)] bg-[size:24px_24px]" />
-					<div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
-						<div className="flex flex-col items-center space-y-8 text-center">
-							<div className="space-y-6 max-w-4xl">
-								<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 font-mono text-[10px] mb-4 animate-pulse uppercase tracking-widest font-bold shadow-sm">
-									system_ready
-								</div>
-								<div className="min-h-[180px] md:min-h-[220px] flex flex-col items-center justify-center">
-									<h1 className="text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl text-slate-900 flex flex-col items-center justify-center">
-										<span className="block mb-3 font-mono text-xl md:text-2xl uppercase tracking-[0.4em] text-slate-400 font-bold">
-											Cloud Orchestration
-										</span>
-										<span className="text-blue-600 font-mono inline-block">
-											<span className="text-slate-300 mr-3 opacity-50">#</span>
-											{displayText}
-											<span className="inline-block w-3 h-10 md:w-5 md:h-16 bg-blue-600 ml-2 animate-pulse align-middle" />
-										</span>
-									</h1>
-								</div>
-								<div className="relative max-w-2xl mx-auto mt-10">
-									<div className="absolute -inset-1 bg-gradient-to-r from-blue-100 to-transparent rounded-[2.5rem] blur opacity-20" />
-									<p className="relative px-10 py-8 bg-white/60 backdrop-blur-md border border-slate-100 rounded-[2.5rem] text-slate-500 font-mono text-sm md:text-base leading-relaxed shadow-xl shadow-blue-900/[0.02] text-center uppercase tracking-tight font-bold">
-										<span className="text-blue-600 mr-2">$</span>
-										Orchestrating production automation, security hardening, and
-										engineering deep-dives at global scale.
-									</p>
-								</div>
-							</div>
-						</div>
-					</div>
-				</section>
+				{/* 0x00 // HERO - Server-rendered for LCP */}
+				<HeroSectionServer />
 
-				<BookingTerminal />
+				<Suspense fallback={null}>
+					<BookingTerminal />
+				</Suspense>
 
 				<ServicesSection />
-				<PlatformsSection />
-				<IaCToolsSection />
-				<IntegrationsSection />
-				<EcosystemAccordion />
+				<Suspense fallback={<div className="h-96" />}>
+					<PlatformsSection />
+				</Suspense>
+				<Suspense fallback={<div className="h-96" />}>
+					<IaCToolsSection />
+				</Suspense>
+				<Suspense fallback={<div className="h-96" />}>
+					<IntegrationsSection />
+				</Suspense>
+				<Suspense fallback={<div className="h-96" />}>
+					<EcosystemAccordion />
+				</Suspense>
 
 				{/* 0x06 // SYSTEM TELEMETRY */}
 				<section className="w-full py-20 md:py-24 bg-slate-50 relative overflow-hidden border-y border-slate-100">
@@ -231,12 +187,13 @@ export default function CloudFalconLanding() {
 								{/* Connection Line */}
 								<div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-300 -translate-y-1/2 z-0" />
 
-								{/* Animated Beats - only on desktop */}
+								{/* Animated Beats - only on desktop, defer animation */}
 								{shouldAnimate &&
 									[0, 1, 2].map((i) => (
 										<motion.div
 											key={i}
 											className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full z-10 shadow-lg shadow-blue-500/50"
+											initial={false}
 											animate={{
 												left: ["0%", "100%"],
 												scale: [1, 1.2, 1],
@@ -286,6 +243,7 @@ export default function CloudFalconLanding() {
 															alt={`${step.tool} logo`}
 															width={40}
 															height={40}
+															loading="lazy"
 															className="group-hover:scale-110 transition-transform"
 														/>
 													</div>
@@ -340,6 +298,7 @@ export default function CloudFalconLanding() {
 															alt={`${step.tool} logo`}
 															width={32}
 															height={32}
+															loading="lazy"
 														/>
 													</div>
 													<div className="flex-1">
@@ -388,7 +347,10 @@ export default function CloudFalconLanding() {
 					<div className="container px-4 md:px-6 max-w-6xl mx-auto relative z-10">
 						<div className="flex flex-col items-center space-y-16 text-center">
 							<div className="space-y-6 max-w-3xl">
-								<div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+								<div
+									className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-mono text-[10px] uppercase tracking-[0.3em] font-bold"
+									aria-live="polite"
+								>
 									uplink_available
 								</div>
 								<h2 className="text-5xl font-bold tracking-tighter sm:text-8xl font-mono uppercase">
@@ -397,9 +359,10 @@ export default function CloudFalconLanding() {
 							</div>
 							<div className="flex flex-col sm:flex-row items-center gap-8 md:gap-12">
 								<Button
-									className="bg-white text-blue-600 hover:bg-blue-50 px-12 md:px-16 py-8 md:py-10 text-xl md:text-2xl font-bold rounded-[2.5rem] shadow-2xl transition-all font-mono uppercase tracking-[0.2em]"
+									className="bg-white text-blue-600 hover:bg-blue-50 px-12 md:px-16 py-8 md:py-10 text-xl md:text-2xl font-bold rounded-[2.5rem] shadow-2xl transition-all font-mono uppercase tracking-[0.2em] min-h-[48px]"
 									type="button"
 									onClick={handleContactClick}
+									aria-label="Connect with CloudFalcon team"
 								>
 									Connect
 								</Button>
@@ -410,13 +373,14 @@ export default function CloudFalconLanding() {
 									<a
 										href="tel:+96890131817"
 										className="text-2xl md:text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
+										aria-label="Call CloudFalcon at +968 90131817"
 									>
 										+968 90131817
 									</a>
 								</div>
 							</div>
 							<div className="mt-12 md:mt-16 pt-8 border-t border-blue-500/30 w-full max-w-lg mx-auto">
-								<p className="font-mono text-[10px] text-blue-200 uppercase tracking-wider text-center mb-4">
+								<p className="font-mono text-[10px] text-blue-100 uppercase tracking-wider text-center mb-4">
 									Or schedule directly via the booking terminal above
 								</p>
 								<div className="flex justify-center gap-4">
@@ -426,8 +390,11 @@ export default function CloudFalconLanding() {
 											window.scrollTo({ top: 0, behavior: "smooth" })
 										}
 										className="font-mono text-xs text-white/80 hover:text-white px-4 py-2 border border-blue-400/30 rounded-lg hover:border-blue-400 transition-all flex items-center gap-2"
+										aria-label="Scroll to top of page"
 									>
-										<span className="text-blue-300">$</span>
+										<span className="text-blue-300" aria-hidden="true">
+											$
+										</span>
 										scroll_to_top()
 									</button>
 								</div>

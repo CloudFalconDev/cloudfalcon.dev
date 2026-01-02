@@ -80,6 +80,7 @@ export default function BookingTerminal() {
 		if (isBooting && bootLine >= BOOT_SEQUENCE.length) {
 			initCalendly();
 		}
+		return undefined;
 	}, [isBooting, bootLine, initCalendly, prefersReducedMotion]);
 
 	// Initialize Calendly when script loads and panel is open
@@ -126,6 +127,10 @@ export default function BookingTerminal() {
 						type="button"
 						onClick={handleToggle}
 						className="w-full relative z-10 text-left"
+						aria-label={
+							isOpen ? "Close booking terminal" : "Open booking terminal"
+						}
+						aria-expanded={isOpen}
 					>
 						{!isOpen ? (
 							/* Expanded CTA when closed */

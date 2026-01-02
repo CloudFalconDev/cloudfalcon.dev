@@ -17,7 +17,7 @@ export interface DocPage {
 	slug: string[];
 	title: string;
 	content: React.ReactNode;
-	frontMatter: Record<string, any>;
+	frontMatter: Record<string, unknown>;
 }
 
 export interface SidebarItem {
