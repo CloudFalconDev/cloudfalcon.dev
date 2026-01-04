@@ -22,15 +22,50 @@ export async function generateMetadata({
 	if (!doc) {
 		return {
 			title: "Not Found | CloudFalcon Docs",
+			robots: {
+				index: false,
+				follow: false,
+			},
 		};
 	}
 
+	const docSlug = slug && slug.length > 0 ? slug.join("/") : "";
+	const docUrl = `https://cloudfalcon.dev/docs${docSlug ? `/${docSlug}` : ""}`;
+	const description =
+		(typeof doc.frontMatter.description === "string"
+			? doc.frontMatter.description
+			: null) || `Documentation for ${doc.title}`;
+
 	return {
 		title: `${doc.title} | CloudFalcon Docs`,
-		description:
-			(typeof doc.frontMatter.description === "string"
-				? doc.frontMatter.description
-				: null) || `Documentation for ${doc.title}`,
+		description,
+		alternates: {
+			canonical: docUrl,
+		},
+		openGraph: {
+			title: `${doc.title} | CloudFalcon Docs`,
+			description,
+			url: docUrl,
+			siteName: "CloudFalcon Docs",
+			type: "article",
+			locale: "en_US",
+		},
+		twitter: {
+			card: "summary",
+			title: `${doc.title} | CloudFalcon Docs`,
+			description,
+		},
+		robots: {
+			index: true,
+			follow: true,
+			googleBot: {
+				index: true,
+				follow: true,
+				"max-video-preview": -1,
+				"max-image-preview": "large",
+				"max-snippet": -1,
+			},
+		},
 	};
 }
 
