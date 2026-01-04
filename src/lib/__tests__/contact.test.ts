@@ -1,7 +1,18 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleContactClick } from "../contact";
 
+// Mock posthog-js module
+vi.mock("posthog-js", () => ({
+	default: {
+		capture: vi.fn(),
+	},
+}));
+
 describe("handleContactClick", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it("should construct correct mailto URL", async () => {
 		// Mock window.location
 		const mockLocation = { href: "" };
@@ -9,13 +20,6 @@ describe("handleContactClick", () => {
 			value: mockLocation,
 			writable: true,
 		});
-
-		// Mock posthog-js import
-		vi.mock("posthog-js", () => ({
-			default: {
-				capture: vi.fn(),
-			},
-		}));
 
 		await handleContactClick();
 
@@ -33,13 +37,6 @@ describe("handleContactClick", () => {
 			value: mockLocation,
 			writable: true,
 		});
-
-		// Mock posthog-js import
-		vi.mock("posthog-js", () => ({
-			default: {
-				capture: vi.fn(),
-			},
-		}));
 
 		await handleContactClick();
 

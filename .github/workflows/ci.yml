@@ -120,7 +120,7 @@ jobs:
               });
 
               const lighthouseJob = jobs.data.jobs.find(job => job.name.includes('lighthouse'));
-              
+
               if (lighthouseJob) {
                 // Get job logs - URLs are in the format "Report: https://..."
                 // Note: GitHub API doesn't provide easy access to step output text
@@ -136,7 +136,7 @@ jobs:
             summary += '### 📊 Performance Audit Summary\n\n';
             summary += '| Page | Performance | Accessibility | Best Practices | SEO | Report |\n';
             summary += '|------|-------------|---------------|---------------|-----|--------|\n';
-            
+
             // Link to step output where URLs are displayed
             const stepLink = `[View Report Links](#step:lighthouse:1)`;
             summary += `| Home | ✅ | ✅ | ✅ | ✅ | ${stepLink} |\n`;
