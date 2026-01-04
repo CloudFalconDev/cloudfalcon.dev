@@ -1,6 +1,41 @@
 "use client";
 
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:1",
+		message: "Page module start",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "A",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import { motion } from "framer-motion";
+
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:15",
+		message: "Framer Motion imported",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "B",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import {
 	ArrowUpCircle,
 	BarChart,
@@ -8,8 +43,44 @@ import {
 	Network,
 	Server,
 } from "lucide-react";
+
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:25",
+		message: "Lucide icons imported",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "E",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import Image from "next/image";
 import posthog from "posthog-js";
+
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:30",
+		message: "PostHog imported synchronously",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "A",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import { lazy, Suspense } from "react";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -56,8 +127,53 @@ const PricingSection = lazy(
 );
 
 export default function CloudFalconLanding() {
+	// #region agent log
+	fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			location: "app/page.tsx:58",
+			message: "Component render start",
+			data: { timestamp: performance.now() },
+			timestamp: Date.now(),
+			sessionId: "debug-session",
+			runId: "run1",
+			hypothesisId: "C",
+		}),
+	}).catch(() => {});
+	// #endregion
 	const isMobile = useIsMobile();
+	// #region agent log
+	fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			location: "app/page.tsx:62",
+			message: "useIsMobile called",
+			data: { isMobile, timestamp: performance.now() },
+			timestamp: Date.now(),
+			sessionId: "debug-session",
+			runId: "run1",
+			hypothesisId: "C",
+		}),
+	}).catch(() => {});
+	// #endregion
 	const prefersReducedMotion = usePrefersReducedMotion();
+	// #region agent log
+	fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			location: "app/page.tsx:65",
+			message: "usePrefersReducedMotion called",
+			data: { prefersReducedMotion, timestamp: performance.now() },
+			timestamp: Date.now(),
+			sessionId: "debug-session",
+			runId: "run1",
+			hypothesisId: "C",
+		}),
+	}).catch(() => {});
+	// #endregion
 	const shouldAnimate = !isMobile && !prefersReducedMotion;
 
 	return (

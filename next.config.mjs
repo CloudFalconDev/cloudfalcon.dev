@@ -29,9 +29,12 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   // Reduce JavaScript bundle size
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production" ? {
-      exclude: ["error", "warn"], // Keep error and warn in production for debugging
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"], // Keep error and warn in production for debugging
+          }
+        : false,
   },
   // PostHog reverse proxy configuration
   async rewrites() {
