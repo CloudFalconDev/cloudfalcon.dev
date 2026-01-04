@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import MainNav from "@/components/MainNav";
+import posthog from "posthog-js";
+import { useRef } from "react";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import MainNav from "@/components/layout/MainNav";
 import { Button } from "@/components/ui/button";
 
 export default function BlogPostError({
@@ -13,12 +14,26 @@ export default function BlogPostError({
 	error: Error & { digest?: string };
 	reset: () => void;
 }) {
-	useEffect(() => {
+	// Track error only once when component mounts
+	const hasTracked = useRef(false);
+
+	if (!hasTracked.current) {
+		hasTracked.current = true;
+		// Track blog error event
+		posthog.capture("blog_error_occurred", {
+			error_message: error.message,
+			error_name: error.name,
+			error_digest: error.digest,
+			source: "blog_error_page",
+		});
+		// Capture as exception for PostHog error tracking
+		posthog.captureException(error);
+
 		// Log error to console in development
 		if (process.env.NODE_ENV === "development") {
 			console.error("Blog post error:", error);
 		}
-	}, [error]);
+	}
 
 	return (
 		<div className="flex flex-col min-h-screen">

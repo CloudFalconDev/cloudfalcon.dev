@@ -27,15 +27,19 @@ yarn-error.log*
 # local env files
 .env*.local
 
+# MCP configuration with secrets (if you create a local override)
+.mcp.json.local
+
+# Cursor IDE configuration (may contain local overrides)
+.cursor/mcp.json.local
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 next-env.d.ts
 
-# Lighthouse reports
+# lighthouse
 .lighthouse/
-lighthouse-report*.html
-lighthouse-report*.json
-lighthouse-accessibility*

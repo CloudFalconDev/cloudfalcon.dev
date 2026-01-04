@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch: # Allow manual triggering
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [24]
-        task: [build, lint, format, type-check, test]
+        task: [build, lint, format, type-check, test, lighthouse]
     steps:
       - uses: actions/checkout@v6.0.1
       - uses: actions/setup-node@v6.1.0
@@ -26,4 +27,61 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm ci
-      - run: npm run ${{ matrix.task }}
+
+      # Standard tasks (build, lint, format, type-check, test)
+      - name: Run ${{ matrix.task }}
+        if: matrix.task != 'lighthouse'
+        run: npm run ${{ matrix.task }}
+        env:
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID || 'test' }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET || 'test' }}
+
+      # Lighthouse-specific steps
+      - name: Build application
+        if: matrix.task == 'lighthouse'
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_PROJECT_ID || 'test' }}
+          NEXT_PUBLIC_SANITY_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_DATASET || 'test' }}
+
+      - name: Start Next.js server
+        if: matrix.task == 'lighthouse'
+        run: npm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for server
+        if: matrix.task == 'lighthouse'
+        run: |
+          timeout=60
+          elapsed=0
+          while ! curl -f http://localhost:3000 > /dev/null 2>&1; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Server failed to start within $timeout seconds"
+              exit 1
+            fi
+            sleep 2
+            elapsed=$((elapsed + 2))
+          done
+          echo "Server is ready"
+
+      - name: Run Lighthouse CI
+        if: matrix.task == 'lighthouse'
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:3000
+            http://localhost:3000/blog
+            http://localhost:3000/docs
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: ./.lighthouserc.json
+
+      # Upload coverage for test task
+      - name: Upload coverage
+        if: matrix.task == 'test'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}

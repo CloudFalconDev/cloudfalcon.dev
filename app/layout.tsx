@@ -1,24 +1,8 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 
-import localFont from "next/font/local";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import "./globals.css";
-
-const geistSans = localFont({
-	src: "./fonts/GeistVF.woff",
-	variable: "--font-geist-sans",
-	weight: "100 900",
-	display: "swap",
-	preload: true,
-});
-const geistMono = localFont({
-	src: "./fonts/GeistMonoVF.woff",
-	variable: "--font-geist-mono",
-	weight: "100 900",
-	display: "swap",
-	preload: true,
-});
 
 export const metadata: Metadata = {
 	title: "CloudFalcon | Cloud Automation, Security, and IaC Experts",
@@ -98,23 +82,6 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<head>
-				{/* Preload critical fonts with fetchPriority */}
-				<link
-					rel="preload"
-					href="/fonts/GeistVF.woff"
-					as="font"
-					type="font/woff"
-					crossOrigin="anonymous"
-					fetchPriority="high"
-				/>
-				<link
-					rel="preload"
-					href="/fonts/GeistMonoVF.woff"
-					as="font"
-					type="font/woff"
-					crossOrigin="anonymous"
-					fetchPriority="high"
-				/>
 				{/* DNS prefetch for external resources */}
 				<link rel="dns-prefetch" href="https://assets.calendly.com" />
 				<link rel="dns-prefetch" href="https://calendly.com" />
@@ -122,9 +89,7 @@ export default function RootLayout({
 				<link rel="preconnect" href="https://assets.calendly.com" />
 				<link rel="preconnect" href="https://calendly.com" />
 			</head>
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground selection:bg-primary/20`}
-			>
+			<body className="antialiased bg-background text-foreground selection:bg-primary/20">
 				<ErrorBoundary>{children}</ErrorBoundary>
 			</body>
 			{isValidGaId && <GoogleAnalytics gaId={gaId} />}

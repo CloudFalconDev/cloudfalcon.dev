@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import MainNav from "@/components/MainNav";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import MainNav from "@/components/layout/MainNav";
 import { Button } from "@/components/ui/button";
 
 export default function BlogPostNotFound() {

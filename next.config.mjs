@@ -6,6 +6,12 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+      },
+    ],
   },
   compress: true,
   poweredByHeader: false,
@@ -18,6 +24,21 @@ const nextConfig = {
       "@radix-ui/react-dropdown-menu",
     ],
   },
+  // PostHog reverse proxy configuration
+  async rewrites() {
+    return [
+      {
+        source: "/ingest/static/:path*",
+        destination: "https://us-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/ingest/:path*",
+        destination: "https://us.i.posthog.com/:path*",
+      },
+    ];
+  },
+  // Required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
 };
 
 export default nextConfig;

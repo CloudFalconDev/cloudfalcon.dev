@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import MainNav from "@/components/MainNav";
+import PortableText from "@/components/content/PortableText";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import MainNav from "@/components/layout/MainNav";
 import { getBlogPost } from "@/lib/content";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export async function generateMetadata(props: {
 	params: Promise<{ slug: string[] }>;
@@ -44,6 +46,21 @@ export default async function BlogPost(props: {
 		return notFound();
 	}
 
+	// Track blog post view on server side
+	const posthog = getPostHogClient();
+	if (posthog) {
+		posthog.capture({
+			distinctId: "anonymous",
+			event: "blog_post_viewed",
+			properties: {
+				post_title: post.title,
+				post_slug: params.slug.join("/"),
+				post_date: post.date,
+				source: "blog_post_page",
+			},
+		});
+	}
+
 	return (
 		<div className="flex flex-col min-h-screen">
 			<Header MainNavComponent={MainNav} />
@@ -72,7 +89,7 @@ export default async function BlogPost(props: {
 						</h1>
 					</div>
 					<div className="text-slate-600 leading-relaxed font-medium">
-						{post.content}
+						<PortableText content={post.content} />
 					</div>
 				</article>
 			</main>

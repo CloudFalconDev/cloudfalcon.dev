@@ -1,10 +1,24 @@
 import Link from "next/link";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import MainNav from "@/components/MainNav";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import MainNav from "@/components/layout/MainNav";
 import { Button } from "@/components/ui/button";
+import { getPostHogClient } from "@/lib/posthog-server";
 
-export default function NotFound() {
+export default async function NotFound() {
+	// Track 404 page view on server side
+	const posthog = getPostHogClient();
+	if (posthog) {
+		posthog.capture({
+			distinctId: "anonymous",
+			event: "not_found_page_viewed",
+			properties: {
+				status_code: 404,
+				source: "not_found_page",
+			},
+		});
+	}
+
 	return (
 		<div className="flex flex-col min-h-screen">
 			<Header MainNavComponent={MainNav} />

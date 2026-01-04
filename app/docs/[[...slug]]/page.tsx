@@ -2,10 +2,11 @@ import { ChevronRight, Home } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import DocsSidebar from "@/components/DocsSidebar";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import MainNav from "@/components/MainNav";
+import DocsSidebar from "@/components/content/DocsSidebar";
+import PortableText from "@/components/content/PortableText";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import MainNav from "@/components/layout/MainNav";
 import { getDocPage, getDocsStructure } from "@/lib/content";
 
 interface PageProps {
@@ -33,28 +34,45 @@ export async function generateMetadata({
 	};
 }
 
-function Breadcrumbs({ slug }: { slug?: string[] }) {
+async function Breadcrumbs({ slug }: { slug?: string[] }) {
 	if (!slug || slug.length === 0) {
 		return null;
 	}
 
+	// Fetch all segment pages to get their labels
+	const segmentDocs = await Promise.all(
+		slug.map(async (_, index) => {
+			const segmentSlug = slug.slice(0, index + 1);
+			const doc = await getDocPage(segmentSlug);
+			return { segmentSlug, doc, hasPage: !!doc };
+		}),
+	);
+
 	const crumbs = slug.map((segment, index) => {
+		const segmentDoc = segmentDocs[index];
 		const href = `/docs/${slug.slice(0, index + 1).join("/")}`;
-		const label = segment.replace(/-/g, " ");
+		// Use sidebarLabel or title from doc if available, otherwise use segment
+		const label = segmentDoc?.doc
+			? (segmentDoc.doc.frontMatter.sidebarLabel as string) ||
+				segmentDoc.doc.title
+			: segment.replace(/-/g, " ");
 		const isLast = index === slug.length - 1;
+		const hasPage = segmentDoc?.hasPage || false;
 
 		return (
 			<li key={href} className="flex items-center">
 				<ChevronRight className="w-4 h-4 text-slate-400 mx-2" />
 				{isLast ? (
-					<span className="text-slate-900 font-medium capitalize">{label}</span>
-				) : (
+					<span className="text-slate-900 font-medium">{label}</span>
+				) : hasPage ? (
 					<Link
 						href={href}
-						className="text-slate-500 hover:text-blue-600 capitalize transition-colors"
+						className="text-slate-500 hover:text-blue-600 transition-colors"
 					>
 						{label}
 					</Link>
+				) : (
+					<span className="text-slate-400">{label}</span>
 				)}
 			</li>
 		);
@@ -78,6 +96,8 @@ function Breadcrumbs({ slug }: { slug?: string[] }) {
 	);
 }
 
+export const revalidate = 60; // Revalidate every 60 seconds to get fresh data from Sanity
+
 export default async function DocPage({ params }: PageProps) {
 	const { slug } = await params;
 
@@ -96,7 +116,7 @@ export default async function DocPage({ params }: PageProps) {
 			<main className="flex-1 container mx-auto px-4 py-12 flex max-w-7xl">
 				<DocsSidebar structure={structure} />
 				<article className="prose lg:prose-lg flex-1 max-w-4xl min-w-0 prose-slate prose-headings:font-bold prose-a:text-blue-600 prose-code:text-blue-600 prose-code:bg-slate-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none">
-					<Breadcrumbs slug={slug} />
+					{await Breadcrumbs({ slug })}
 					<div className="flex flex-col gap-4 mb-8 pb-8 border-b border-slate-100">
 						<div className="flex items-center gap-3">
 							<span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600 font-mono text-[10px] uppercase tracking-wider border border-blue-100">
@@ -107,7 +127,9 @@ export default async function DocPage({ params }: PageProps) {
 							{doc.title}
 						</h1>
 					</div>
-					<div className="text-slate-600 leading-relaxed">{doc.content}</div>
+					<div className="text-slate-600 leading-relaxed">
+						<PortableText content={doc.content} />
+					</div>
 				</article>
 			</main>
 			<Footer />

@@ -9,11 +9,7 @@
 	"postStartCommand": "npm run dev",
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"biomejs.biome",
-				"bradlc.vscode-tailwindcss",
-				"esbenp.prettier-vscode"
-			],
+			"extensions": ["biomejs.biome", "bradlc.vscode-tailwindcss"],
 			"settings": {
 				"editor.defaultFormatter": "biomejs.biome",
 				"editor.formatOnSave": true,

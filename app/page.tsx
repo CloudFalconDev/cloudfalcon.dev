@@ -9,33 +9,51 @@ import {
 	Server,
 } from "lucide-react";
 import Image from "next/image";
+import posthog from "posthog-js";
 import { lazy, Suspense } from "react";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
+import MainNav from "@/components/layout/MainNav";
 // Hero section - server-rendered for LCP
-import HeroSectionServer from "@/components/HeroSectionServer";
-import MainNav from "@/components/MainNav";
-import ServicesSection from "@/components/ServicesSection";
-import TelemetryCard from "@/components/TelemetryCard";
+import HeroSectionServer from "@/components/sections/HeroSectionServer";
+import ServicesSection from "@/components/sections/ServicesSection";
+import TelemetryCard from "@/components/sections/TelemetryCard";
 import { Button } from "@/components/ui/button";
 import { pipelineSteps } from "@/data/pipelineSteps";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { handleContactClick } from "@/lib/contact";
-import { useIsMobile, usePrefersReducedMotion } from "@/lib/useIsMobile";
+
+// Track phone call initiated
+function handlePhoneClick() {
+	posthog.capture("phone_call_initiated", {
+		phone_number: "+96890131817",
+		source: "contact_section",
+	});
+}
 
 // Lazy load below-fold components
-const BookingTerminal = lazy(() => import("@/components/BookingTerminal"));
+const BookingTerminal = lazy(
+	() => import("@/components/features/BookingTerminal"),
+);
 const GeometricBackgroundViewport = lazy(
-	() => import("@/components/GeometricBackgroundViewport"),
+	() => import("@/components/background/GeometricBackgroundViewport"),
 );
 const EcosystemAccordion = lazy(
-	() => import("@/components/EcosystemAccordion"),
+	() => import("@/components/sections/EcosystemAccordion"),
 );
-const IaCToolsSection = lazy(() => import("@/components/IaCToolsSection"));
+const IaCToolsSection = lazy(
+	() => import("@/components/sections/IaCToolsSection"),
+);
 const IntegrationsSection = lazy(
-	() => import("@/components/IntegrationsSection"),
+	() => import("@/components/sections/IntegrationsSection"),
 );
-const PlatformsSection = lazy(() => import("@/components/PlatformsSection"));
-const PricingSection = lazy(() => import("@/components/PricingSection"));
+const PlatformsSection = lazy(
+	() => import("@/components/sections/PlatformsSection"),
+);
+const PricingSection = lazy(
+	() => import("@/components/sections/PricingSection"),
+);
 
 export default function CloudFalconLanding() {
 	const isMobile = useIsMobile();
@@ -374,6 +392,7 @@ export default function CloudFalconLanding() {
 										href="tel:+96890131817"
 										className="text-2xl md:text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
 										aria-label="Call CloudFalcon at +968 90131817"
+										onClick={handlePhoneClick}
 									>
 										+968 90131817
 									</a>
