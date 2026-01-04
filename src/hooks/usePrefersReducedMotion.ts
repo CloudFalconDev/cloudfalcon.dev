@@ -8,6 +8,9 @@ export function usePrefersReducedMotion() {
 	useEffect(() => {
 		// Defer matchMedia to avoid blocking initial render
 		// Use requestIdleCallback if available, otherwise setTimeout
+		let cleanup: (() => void) | null = null;
+		let timeoutId: ReturnType<typeof setTimeout> | number | null = null;
+
 		const initMediaQuery = () => {
 			// #region agent log
 			fetch(
@@ -51,14 +54,30 @@ export function usePrefersReducedMotion() {
 			const handler = (e: MediaQueryListEvent) =>
 				setPrefersReducedMotion(e.matches);
 			mediaQuery.addEventListener("change", handler);
-			return () => mediaQuery.removeEventListener("change", handler);
+			cleanup = () => mediaQuery.removeEventListener("change", handler);
 		};
 
 		if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-			window.requestIdleCallback(initMediaQuery, { timeout: 100 });
+			timeoutId = window.requestIdleCallback(initMediaQuery, { timeout: 100 });
 		} else {
-			setTimeout(initMediaQuery, 0);
+			timeoutId = setTimeout(initMediaQuery, 0);
 		}
+
+		return () => {
+			if (cleanup) {
+				cleanup();
+			}
+			if (timeoutId !== null) {
+				if (typeof timeoutId === "number" && timeoutId > 0) {
+					clearTimeout(timeoutId);
+				} else if (
+					typeof window !== "undefined" &&
+					"cancelIdleCallback" in window
+				) {
+					window.cancelIdleCallback(timeoutId as number);
+				}
+			}
+		};
 	}, []);
 
 	return prefersReducedMotion;

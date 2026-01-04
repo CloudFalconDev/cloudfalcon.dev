@@ -14,16 +14,26 @@ describe("useIsMobile", () => {
 		window.matchMedia = originalMatchMedia;
 	});
 
-	it("should return false for desktop viewport", () => {
+	it("should return false for desktop viewport", async () => {
 		mockMatchMedia(false);
 		const { result } = renderHook(() => useIsMobile());
+		// Initially false (before deferred execution)
 		expect(result.current).toBe(false);
+		// Wait for deferred execution
+		await waitFor(() => {
+			expect(result.current).toBe(false);
+		});
 	});
 
-	it("should return true for mobile viewport", () => {
+	it("should return true for mobile viewport", async () => {
 		mockMatchMedia(true);
 		const { result } = renderHook(() => useIsMobile());
-		expect(result.current).toBe(true);
+		// Initially false (before deferred execution)
+		expect(result.current).toBe(false);
+		// Wait for deferred execution
+		await waitFor(() => {
+			expect(result.current).toBe(true);
+		});
 	});
 
 	it("should update when media query changes", async () => {
@@ -65,15 +75,16 @@ describe("useIsMobile", () => {
 		});
 	});
 
-	it("should clean up event listener on unmount", () => {
+	it("should clean up event listener on unmount", async () => {
 		const removeEventListener = vi.fn();
+		const addEventListener = vi.fn();
 		const mediaQueryList = {
 			matches: false,
 			media: "(max-width: 767px)",
 			onchange: null,
 			addListener: vi.fn(),
 			removeListener: vi.fn(),
-			addEventListener: vi.fn(),
+			addEventListener,
 			removeEventListener,
 			dispatchEvent: vi.fn(),
 		};
@@ -83,7 +94,20 @@ describe("useIsMobile", () => {
 			value: vi.fn(() => mediaQueryList),
 		});
 
+		// Mock requestIdleCallback to execute immediately
+		Object.defineProperty(window, "requestIdleCallback", {
+			writable: true,
+			value: vi.fn((callback: () => void) => {
+				callback();
+				return 1;
+			}),
+		});
+
 		const { unmount } = renderHook(() => useIsMobile());
+		// Wait for deferred execution to set up listeners
+		await waitFor(() => {
+			expect(addEventListener).toHaveBeenCalled();
+		});
 		unmount();
 
 		expect(removeEventListener).toHaveBeenCalled();
