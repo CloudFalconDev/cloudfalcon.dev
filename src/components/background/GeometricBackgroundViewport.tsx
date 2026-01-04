@@ -10,11 +10,25 @@ export default function GeometricBackgroundViewport() {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		// Only load when in viewport or after a delay
+		// Defer Three.js loading to reduce initial TBT
+		// Use requestIdleCallback if available, otherwise setTimeout
+		const loadThreeJS = () => {
+			setShouldLoad(true);
+		};
+
+		// Only load when in viewport or after idle time
 		const observer = new IntersectionObserver(
 			(entries) => {
 				if (entries[0].isIntersecting) {
-					setShouldLoad(true);
+					// Use requestIdleCallback to load during idle time
+					if (
+						typeof window !== "undefined" &&
+						"requestIdleCallback" in window
+					) {
+						window.requestIdleCallback(loadThreeJS, { timeout: 3000 });
+					} else {
+						setTimeout(loadThreeJS, 3000);
+					}
 					observer.disconnect();
 				}
 			},
@@ -25,11 +39,15 @@ export default function GeometricBackgroundViewport() {
 			observer.observe(containerRef.current);
 		}
 
-		// Fallback: load after 2 seconds if not in viewport
+		// Fallback: load after 3 seconds if not in viewport (increased delay)
 		const timeout = setTimeout(() => {
-			setShouldLoad(true);
+			if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+				window.requestIdleCallback(loadThreeJS, { timeout: 1000 });
+			} else {
+				loadThreeJS();
+			}
 			observer.disconnect();
-		}, 2000);
+		}, 3000);
 
 		return () => {
 			observer.disconnect();

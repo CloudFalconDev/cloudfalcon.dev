@@ -85,7 +85,7 @@ jobs:
           # Extract report URLs from Lighthouse CI step output
           # The URLs are logged in the format: "Open the report at https://..."
           echo "Extracting Lighthouse report URLs from step output..."
-          
+
           # Store URLs in environment file for next step
           echo "HOME_URL=" >> $GITHUB_ENV
           echo "BLOG_URL=" >> $GITHUB_ENV
@@ -98,14 +98,14 @@ jobs:
           script: |
             const core = require('@actions/core');
             const fs = require('fs');
-            
+
             // Try to find report URLs from Lighthouse step output
             // The treosh/lighthouse-ci-action logs URLs in the format:
             // "Open the report at https://storage.googleapis.com/..."
             let homeUrl = '';
             let blogUrl = '';
             let docsUrl = '';
-            
+
             // Build summary
             let summary = '## 🔍 Lighthouse CI Results\n\n';
             summary += '### 📊 Performance Audit Summary\n\n';
@@ -114,12 +114,12 @@ jobs:
             summary += '| Home | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
             summary += '| Blog | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
             summary += '| Docs | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
-            
+
             summary += '\n### 🔗 How to View Reports\n\n';
             summary += '1. **Step Output**: Check the "Run Lighthouse CI" step above for direct report links\n';
             summary += '2. **Workflow Artifacts**: Download the `lighthouse-results` artifact\n';
             summary += '3. **Temporary Storage**: Reports are uploaded to temporary public storage\n';
-            
+
             summary += '\n### ⏱️ CI Step Summary\n\n';
             summary += '| Step | Status |\n';
             summary += '|------|--------|\n';
@@ -129,11 +129,11 @@ jobs:
             summary += '| Type Check | ✅ |\n';
             summary += '| Test | ✅ |\n';
             summary += '| Lighthouse | ✅ |\n';
-            
+
             // Post as workflow summary (works for both PRs and pushes)
             core.summary.addRaw(summary);
             await core.summary.write();
-            
+
             // Also post as PR comment if this is a PR
             if (context.eventName === 'pull_request') {
               try {

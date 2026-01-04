@@ -75,16 +75,16 @@ export default function CloudFalconLanding() {
 				</Suspense>
 
 				<ServicesSection />
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<PlatformsSection />
 				</Suspense>
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<IaCToolsSection />
 				</Suspense>
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<IntegrationsSection />
 				</Suspense>
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<EcosystemAccordion />
 				</Suspense>
 

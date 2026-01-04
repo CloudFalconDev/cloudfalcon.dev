@@ -35,23 +35,33 @@ export default function BookingTerminal() {
 
 	const initCalendly = useCallback(() => {
 		if (window.Calendly && containerRef.current && isOpen) {
-			containerRef.current.innerHTML = "";
-			window.Calendly.initInlineWidget({
-				url: "https://calendly.com/mohammed-cloudfalcon/30min",
-				parentElement: containerRef.current,
-				resize: true,
-				pageSettings: {
-					backgroundColor: "ffffff",
-					hideEventTypeDetails: true,
-					hideLandingPageDetails: true,
-					primaryColor: "2563eb",
-					textColor: "0f172a",
-				},
-			});
-			setTimeout(() => {
-				setIsBooting(false);
-				setCalendlyReady(true);
-			}, 800);
+			// Use requestIdleCallback to defer Calendly initialization
+			const init = () => {
+				if (!containerRef.current || !window.Calendly) return;
+				containerRef.current.innerHTML = "";
+				window.Calendly.initInlineWidget({
+					url: "https://calendly.com/mohammed-cloudfalcon/30min",
+					parentElement: containerRef.current,
+					resize: true,
+					pageSettings: {
+						backgroundColor: "ffffff",
+						hideEventTypeDetails: true,
+						hideLandingPageDetails: true,
+						primaryColor: "2563eb",
+						textColor: "0f172a",
+					},
+				});
+				setTimeout(() => {
+					setIsBooting(false);
+					setCalendlyReady(true);
+				}, 800);
+			};
+
+			if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+				window.requestIdleCallback(init, { timeout: 500 });
+			} else {
+				setTimeout(init, 100);
+			}
 		}
 	}, [isOpen]);
 

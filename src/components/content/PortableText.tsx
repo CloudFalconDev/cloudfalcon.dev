@@ -30,7 +30,9 @@ function YouTubeEmbed({ url }: { url: string }) {
 	const videoId = getYouTubeVideoId(url);
 
 	if (!videoId) {
-		console.warn("Invalid YouTube URL:", url);
+		if (process.env.NODE_ENV === "development") {
+			console.warn("Invalid YouTube URL:", url);
+		}
 		return (
 			<div className="my-8 p-4 bg-red-50 border border-red-200 rounded-lg">
 				<p className="text-red-600 text-sm">Invalid YouTube URL: {url}</p>
@@ -87,7 +89,9 @@ const components = {
 							decoding="async"
 							fetchPriority="low"
 							onError={(e) => {
-								console.error("Failed to load image:", imageUrl);
+								if (process.env.NODE_ENV === "development") {
+									console.error("Failed to load image:", imageUrl);
+								}
 								e.currentTarget.style.display = "none";
 							}}
 						/>
@@ -121,7 +125,9 @@ const components = {
 			};
 		}) => {
 			if (!value?.url) {
-				console.warn("externalImage missing url:", value);
+				if (process.env.NODE_ENV === "development") {
+					console.warn("externalImage missing url:", value);
+				}
 				return null;
 			}
 			// Handle both absolute URLs and relative paths
