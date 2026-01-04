@@ -62,24 +62,8 @@ fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
 // #endregion
 
 import Image from "next/image";
-import posthog from "posthog-js";
-
-// #region agent log
-fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
-	method: "POST",
-	headers: { "Content-Type": "application/json" },
-	body: JSON.stringify({
-		location: "app/page.tsx:30",
-		message: "PostHog imported synchronously",
-		data: { timestamp: performance.now() },
-		timestamp: Date.now(),
-		sessionId: "debug-session",
-		runId: "run1",
-		hypothesisId: "A",
-	}),
-}).catch(() => {});
-
-// #endregion
+// PostHog is loaded dynamically in instrumentation-client.ts
+// Only import when needed for event tracking
 
 import { lazy, Suspense } from "react";
 import Footer from "@/components/layout/Footer";
@@ -95,12 +79,20 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { handleContactClick } from "@/lib/contact";
 
-// Track phone call initiated
-function handlePhoneClick() {
-	posthog.capture("phone_call_initiated", {
-		phone_number: "+96890131817",
-		source: "contact_section",
-	});
+// Track phone call initiated (lazy load PostHog)
+async function handlePhoneClick() {
+	try {
+		const posthog = (await import("posthog-js")).default;
+		posthog.capture("phone_call_initiated", {
+			phone_number: "+96890131817",
+			source: "contact_section",
+		});
+	} catch (error) {
+		// PostHog not available, fail silently
+		if (process.env.NODE_ENV === "development") {
+			console.warn("PostHog not available:", error);
+		}
+	}
 }
 
 // Lazy load below-fold components
@@ -508,7 +500,9 @@ export default function CloudFalconLanding() {
 										href="tel:+96890131817"
 										className="text-2xl md:text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
 										aria-label="Call CloudFalcon at +968 90131817"
-										onClick={handlePhoneClick}
+										onClick={() => {
+											void handlePhoneClick();
+										}}
 									>
 										+968 90131817
 									</a>
