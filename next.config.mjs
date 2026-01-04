@@ -16,6 +16,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  swcMinify: true,
   experimental: {
     optimizePackageImports: [
       "lucide-react",
@@ -24,6 +25,8 @@ const nextConfig = {
       "@radix-ui/react-dropdown-menu",
     ],
   },
+  // Optimize production builds
+  productionBrowserSourceMaps: false,
   // PostHog reverse proxy configuration
   async rewrites() {
     return [

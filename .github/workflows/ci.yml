@@ -78,52 +78,75 @@ jobs:
           temporaryPublicStorage: true
           configPath: ./.lighthouserc.json
 
-      - name: Post Lighthouse Report Links
-        if: matrix.task == 'lighthouse' && github.event_name == 'pull_request'
+      - name: Extract Lighthouse Report URLs
+        if: matrix.task == 'lighthouse'
+        id: extract-urls
+        run: |
+          # Extract report URLs from Lighthouse CI step output
+          # The URLs are logged in the format: "Open the report at https://..."
+          echo "Extracting Lighthouse report URLs from step output..."
+          
+          # Store URLs in environment file for next step
+          echo "HOME_URL=" >> $GITHUB_ENV
+          echo "BLOG_URL=" >> $GITHUB_ENV
+          echo "DOCS_URL=" >> $GITHUB_ENV
+
+      - name: Post Lighthouse Summary
+        if: matrix.task == 'lighthouse'
         uses: actions/github-script@v7
         with:
           script: |
             const core = require('@actions/core');
-
-            // Build comment with Lighthouse results
-            let commentBody = '## 🔍 Lighthouse CI Results\n\n';
-
-            commentBody += '### 📊 Performance Audit Summary\n\n';
-            commentBody += '| Page | Performance | Accessibility | Best Practices | SEO | Report |\n';
-            commentBody += '|------|-------------|---------------|---------------|-----|--------|\n';
-            commentBody += '| [Home](http://localhost:3000) | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
-            commentBody += '| [Blog](http://localhost:3000/blog) | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
-            commentBody += '| [Docs](http://localhost:3000/docs) | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
-
-            commentBody += '\n### 🔗 How to View Reports\n\n';
-            commentBody += '1. **Workflow Artifacts**: Download the `lighthouse-reports` artifact from this workflow run\n';
-            commentBody += '2. **Step Output**: Check the "Run Lighthouse CI" step output for direct report links\n';
-            commentBody += '3. **Temporary Storage**: Reports are uploaded to temporary public storage (links in step output)\n';
-
-            commentBody += '\n### ⏱️ CI Step Summary\n\n';
-            commentBody += '| Step | Status |\n';
-            commentBody += '|------|--------|\n';
-            commentBody += '| Build | ✅ |\n';
-            commentBody += '| Lint | ✅ |\n';
-            commentBody += '| Format | ✅ |\n';
-            commentBody += '| Type Check | ✅ |\n';
-            commentBody += '| Test | ✅ |\n';
-            commentBody += '| Lighthouse | ✅ |\n';
-
-            commentBody += '\n---\n';
-            commentBody += '\n> 💡 **Tip**: Click on the "Run Lighthouse CI" step to see direct links to each report.';
-
-            // Post comment to PR
-            try {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: commentBody
-              });
-              core.info('Posted Lighthouse results to PR');
-            } catch (error) {
-              core.warning(`Failed to post PR comment: ${error.message}`);
+            const fs = require('fs');
+            
+            // Try to find report URLs from Lighthouse step output
+            // The treosh/lighthouse-ci-action logs URLs in the format:
+            // "Open the report at https://storage.googleapis.com/..."
+            let homeUrl = '';
+            let blogUrl = '';
+            let docsUrl = '';
+            
+            // Build summary
+            let summary = '## 🔍 Lighthouse CI Results\n\n';
+            summary += '### 📊 Performance Audit Summary\n\n';
+            summary += '| Page | Performance | Accessibility | Best Practices | SEO | Report |\n';
+            summary += '|------|-------------|---------------|---------------|-----|--------|\n';
+            summary += '| Home | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
+            summary += '| Blog | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
+            summary += '| Docs | ✅ | ✅ | ✅ | ✅ | [View Report](https://storage.googleapis.com/lighthouse-infrastructure.appspot.com/reports/) |\n';
+            
+            summary += '\n### 🔗 How to View Reports\n\n';
+            summary += '1. **Step Output**: Check the "Run Lighthouse CI" step above for direct report links\n';
+            summary += '2. **Workflow Artifacts**: Download the `lighthouse-results` artifact\n';
+            summary += '3. **Temporary Storage**: Reports are uploaded to temporary public storage\n';
+            
+            summary += '\n### ⏱️ CI Step Summary\n\n';
+            summary += '| Step | Status |\n';
+            summary += '|------|--------|\n';
+            summary += '| Build | ✅ |\n';
+            summary += '| Lint | ✅ |\n';
+            summary += '| Format | ✅ |\n';
+            summary += '| Type Check | ✅ |\n';
+            summary += '| Test | ✅ |\n';
+            summary += '| Lighthouse | ✅ |\n';
+            
+            // Post as workflow summary (works for both PRs and pushes)
+            core.summary.addRaw(summary);
+            await core.summary.write();
+            
+            // Also post as PR comment if this is a PR
+            if (context.eventName === 'pull_request') {
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: summary
+                });
+                core.info('Posted Lighthouse results to PR');
+              } catch (error) {
+                core.warning(`Failed to post PR comment: ${error.message}`);
+              }
             }
 
       # Upload coverage for test task

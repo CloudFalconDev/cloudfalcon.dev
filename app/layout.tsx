@@ -85,9 +85,24 @@ export default function RootLayout({
 				{/* DNS prefetch for external resources */}
 				<link rel="dns-prefetch" href="https://assets.calendly.com" />
 				<link rel="dns-prefetch" href="https://calendly.com" />
+				<link rel="dns-prefetch" href="https://cdn.sanity.io" />
+				<link rel="dns-prefetch" href="https://us.i.posthog.com" />
 				{/* Preconnect to external domains for faster connection */}
-				<link rel="preconnect" href="https://assets.calendly.com" />
-				<link rel="preconnect" href="https://calendly.com" />
+				<link
+					rel="preconnect"
+					href="https://assets.calendly.com"
+					crossOrigin="anonymous"
+				/>
+				<link
+					rel="preconnect"
+					href="https://calendly.com"
+					crossOrigin="anonymous"
+				/>
+				<link
+					rel="preconnect"
+					href="https://cdn.sanity.io"
+					crossOrigin="anonymous"
+				/>
 			</head>
 			<body className="antialiased bg-background text-foreground selection:bg-primary/20">
 				<ErrorBoundary>{children}</ErrorBoundary>

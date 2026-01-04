@@ -84,6 +84,8 @@ const components = {
 							alt={value.alt || "Image"}
 							className="rounded-lg max-w-full h-auto"
 							loading="lazy"
+							decoding="async"
+							fetchPriority="low"
 							onError={(e) => {
 								console.error("Failed to load image:", imageUrl);
 								e.currentTarget.style.display = "none";
@@ -137,6 +139,8 @@ const components = {
 						alt={value.alt || "Image"}
 						className="rounded-lg max-w-full h-auto"
 						loading="lazy"
+						decoding="async"
+						fetchPriority="low"
 						onError={(e) => {
 							console.error("Failed to load image:", imageUrl);
 							e.currentTarget.style.display = "none";
