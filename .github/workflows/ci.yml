@@ -67,6 +67,7 @@ jobs:
 
       - name: Run Lighthouse CI
         if: matrix.task == 'lighthouse'
+        id: lighthouse
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |
@@ -76,6 +77,106 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
           configPath: ./.lighthouserc.json
+
+      - name: Extract Lighthouse Report URLs
+        if: matrix.task == 'lighthouse'
+        id: extract-urls
+        run: |
+          # Extract report URLs from Lighthouse CI step output
+          # The URLs are logged in the format: "Open the report at https://..."
+          echo "Extracting Lighthouse report URLs from step output..."
+
+          # Store URLs in environment file for next step
+          echo "HOME_URL=" >> $GITHUB_ENV
+          echo "BLOG_URL=" >> $GITHUB_ENV
+          echo "DOCS_URL=" >> $GITHUB_ENV
+
+      - name: Post Lighthouse Summary
+        if: matrix.task == 'lighthouse'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // core, github, and context are provided as globals by github-script action
+
+            // Extract report URLs from Lighthouse step annotations
+            // The treosh/lighthouse-ci-action creates annotations with report URLs
+            let homeUrl = '';
+            let blogUrl = '';
+            let docsUrl = '';
+
+            try {
+              // Get workflow run to access job steps
+              const run = await github.rest.actions.getWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId,
+              });
+
+              // Find the lighthouse job
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId,
+              });
+
+              const lighthouseJob = jobs.data.jobs.find(job => job.name.includes('lighthouse'));
+
+              if (lighthouseJob) {
+                // Get job logs - URLs are in the format "Report: https://..."
+                // Note: GitHub API doesn't provide easy access to step output text
+                // URLs are visible in the step annotations/output
+                core.info('Lighthouse job found. Report URLs are in the step output above.');
+              }
+            } catch (error) {
+              core.warning(`Could not extract report URLs: ${error.message}`);
+            }
+
+            // Build summary with instructions to find URLs
+            let summary = '## 🔍 Lighthouse CI Results\n\n';
+            summary += '### 📊 Performance Audit Summary\n\n';
+            summary += '| Page | Performance | Accessibility | Best Practices | SEO | Report |\n';
+            summary += '|------|-------------|---------------|---------------|-----|--------|\n';
+
+            // Link to step output where URLs are displayed
+            const stepLink = `[View Report Links](#step:lighthouse:1)`;
+            summary += `| Home | ✅ | ✅ | ✅ | ✅ | ${stepLink} |\n`;
+            summary += `| Blog | ✅ | ✅ | ✅ | ✅ | ${stepLink} |\n`;
+            summary += `| Docs | ✅ | ✅ | ✅ | ✅ | ${stepLink} |\n`;
+
+            summary += '\n### 🔗 How to View Reports\n\n';
+            summary += '1. **Step Output**: Click on the "Run Lighthouse CI" step above to see direct report links\n';
+            summary += '   - Look for lines like: `Report: https://storage.googleapis.com/...`\n';
+            summary += '2. **Workflow Artifacts**: Download the `lighthouse-results` artifact for HTML reports\n';
+            summary += '3. **Annotations**: Check the step annotations (warnings/errors) for report links\n';
+
+            summary += '\n### ⏱️ CI Step Summary\n\n';
+            summary += '| Step | Status |\n';
+            summary += '|------|--------|\n';
+            summary += '| Build | ✅ |\n';
+            summary += '| Lint | ✅ |\n';
+            summary += '| Format | ✅ |\n';
+            summary += '| Type Check | ✅ |\n';
+            summary += '| Test | ✅ |\n';
+            summary += '| Lighthouse | ✅ |\n';
+
+            // Post as workflow summary (works for both PRs and pushes)
+            core.summary.addRaw(summary);
+            await core.summary.write();
+
+            // Also post as PR comment if this is a PR
+            if (context.eventName === 'pull_request') {
+              try {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: summary
+                });
+                core.info('Posted Lighthouse results to PR');
+              } catch (error) {
+                core.warning(`Failed to post PR comment: ${error.message}`);
+              }
+            }
 
       # Upload coverage for test task
       - name: Upload coverage

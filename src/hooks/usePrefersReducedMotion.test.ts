@@ -14,16 +14,26 @@ describe("usePrefersReducedMotion", () => {
 		window.matchMedia = originalMatchMedia;
 	});
 
-	it("should return false when reduced motion is not preferred", () => {
+	it("should return false when reduced motion is not preferred", async () => {
 		mockMatchMedia(false);
 		const { result } = renderHook(() => usePrefersReducedMotion());
+		// Initially false (before deferred execution)
 		expect(result.current).toBe(false);
+		// Wait for deferred execution
+		await waitFor(() => {
+			expect(result.current).toBe(false);
+		});
 	});
 
-	it("should return true when reduced motion is preferred", () => {
+	it("should return true when reduced motion is preferred", async () => {
 		mockMatchMedia(true);
 		const { result } = renderHook(() => usePrefersReducedMotion());
-		expect(result.current).toBe(true);
+		// Initially false (before deferred execution)
+		expect(result.current).toBe(false);
+		// Wait for deferred execution
+		await waitFor(() => {
+			expect(result.current).toBe(true);
+		});
 	});
 
 	it("should update when preference changes", async () => {
@@ -84,15 +94,16 @@ describe("usePrefersReducedMotion", () => {
 		);
 	});
 
-	it("should clean up event listener on unmount", () => {
+	it("should clean up event listener on unmount", async () => {
 		const removeEventListener = vi.fn();
+		const addEventListener = vi.fn();
 		const mediaQueryList = {
 			matches: false,
 			media: "(prefers-reduced-motion: reduce)",
 			onchange: null,
 			addListener: vi.fn(),
 			removeListener: vi.fn(),
-			addEventListener: vi.fn(),
+			addEventListener,
 			removeEventListener,
 			dispatchEvent: vi.fn(),
 		};
@@ -102,7 +113,20 @@ describe("usePrefersReducedMotion", () => {
 			value: vi.fn(() => mediaQueryList),
 		});
 
+		// Mock requestIdleCallback to execute immediately
+		Object.defineProperty(window, "requestIdleCallback", {
+			writable: true,
+			value: vi.fn((callback: () => void) => {
+				callback();
+				return 1;
+			}),
+		});
+
 		const { unmount } = renderHook(() => usePrefersReducedMotion());
+		// Wait for deferred execution to set up listeners
+		await waitFor(() => {
+			expect(addEventListener).toHaveBeenCalled();
+		});
 		unmount();
 
 		expect(removeEventListener).toHaveBeenCalled();

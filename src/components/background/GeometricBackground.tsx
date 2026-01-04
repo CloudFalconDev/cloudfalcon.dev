@@ -45,6 +45,8 @@ function GeometricBackground() {
 			alpha: true,
 			antialias: !isMobile, // Disable antialiasing on mobile
 			powerPreference: "low-power",
+			stencil: false, // Disable stencil buffer for better performance
+			depth: true,
 		});
 
 		sceneRef.current = scene;
@@ -53,6 +55,8 @@ function GeometricBackground() {
 
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		renderer.setPixelRatio(pixelRatio);
+		// Enable renderer optimizations
+		renderer.shadowMap.enabled = false; // Disable shadows for better performance
 		const container = containerRef.current;
 		container.appendChild(renderer.domElement);
 

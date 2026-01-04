@@ -1,6 +1,41 @@
 "use client";
 
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:1",
+		message: "Page module start",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "A",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import { motion } from "framer-motion";
+
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:15",
+		message: "Framer Motion imported",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "B",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import {
 	ArrowUpCircle,
 	BarChart,
@@ -8,8 +43,28 @@ import {
 	Network,
 	Server,
 } from "lucide-react";
+
+// #region agent log
+fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+	method: "POST",
+	headers: { "Content-Type": "application/json" },
+	body: JSON.stringify({
+		location: "app/page.tsx:25",
+		message: "Lucide icons imported",
+		data: { timestamp: performance.now() },
+		timestamp: Date.now(),
+		sessionId: "debug-session",
+		runId: "run1",
+		hypothesisId: "E",
+	}),
+}).catch(() => {});
+
+// #endregion
+
 import Image from "next/image";
-import posthog from "posthog-js";
+// PostHog is loaded dynamically in instrumentation-client.ts
+// Only import when needed for event tracking
+
 import { lazy, Suspense } from "react";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -24,12 +79,20 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { handleContactClick } from "@/lib/contact";
 
-// Track phone call initiated
-function handlePhoneClick() {
-	posthog.capture("phone_call_initiated", {
-		phone_number: "+96890131817",
-		source: "contact_section",
-	});
+// Track phone call initiated (lazy load PostHog)
+async function handlePhoneClick() {
+	try {
+		const posthog = (await import("posthog-js")).default;
+		posthog.capture("phone_call_initiated", {
+			phone_number: "+96890131817",
+			source: "contact_section",
+		});
+	} catch (error) {
+		// PostHog not available, fail silently
+		if (process.env.NODE_ENV === "development") {
+			console.warn("PostHog not available:", error);
+		}
+	}
 }
 
 // Lazy load below-fold components
@@ -56,8 +119,53 @@ const PricingSection = lazy(
 );
 
 export default function CloudFalconLanding() {
+	// #region agent log
+	fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			location: "app/page.tsx:58",
+			message: "Component render start",
+			data: { timestamp: performance.now() },
+			timestamp: Date.now(),
+			sessionId: "debug-session",
+			runId: "run1",
+			hypothesisId: "C",
+		}),
+	}).catch(() => {});
+	// #endregion
 	const isMobile = useIsMobile();
+	// #region agent log
+	fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			location: "app/page.tsx:62",
+			message: "useIsMobile called",
+			data: { isMobile, timestamp: performance.now() },
+			timestamp: Date.now(),
+			sessionId: "debug-session",
+			runId: "run1",
+			hypothesisId: "C",
+		}),
+	}).catch(() => {});
+	// #endregion
 	const prefersReducedMotion = usePrefersReducedMotion();
+	// #region agent log
+	fetch("http://127.0.0.1:7243/ingest/5f05c192-6016-49b8-896c-dba9c7931ad0", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			location: "app/page.tsx:65",
+			message: "usePrefersReducedMotion called",
+			data: { prefersReducedMotion, timestamp: performance.now() },
+			timestamp: Date.now(),
+			sessionId: "debug-session",
+			runId: "run1",
+			hypothesisId: "C",
+		}),
+	}).catch(() => {});
+	// #endregion
 	const shouldAnimate = !isMobile && !prefersReducedMotion;
 
 	return (
@@ -75,16 +183,16 @@ export default function CloudFalconLanding() {
 				</Suspense>
 
 				<ServicesSection />
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<PlatformsSection />
 				</Suspense>
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<IaCToolsSection />
 				</Suspense>
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<IntegrationsSection />
 				</Suspense>
-				<Suspense fallback={<div className="h-96" />}>
+				<Suspense fallback={<div className="h-96" aria-hidden="true" />}>
 					<EcosystemAccordion />
 				</Suspense>
 
@@ -392,7 +500,9 @@ export default function CloudFalconLanding() {
 										href="tel:+96890131817"
 										className="text-2xl md:text-4xl font-mono font-bold hover:text-white transition-colors tracking-tighter"
 										aria-label="Call CloudFalcon at +968 90131817"
-										onClick={handlePhoneClick}
+										onClick={() => {
+											void handlePhoneClick();
+										}}
 									>
 										+968 90131817
 									</a>

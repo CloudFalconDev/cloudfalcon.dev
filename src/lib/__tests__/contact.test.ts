@@ -1,8 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleContactClick } from "../contact";
 
+// Mock posthog-js module
+vi.mock("posthog-js", () => ({
+	default: {
+		capture: vi.fn(),
+	},
+}));
+
 describe("handleContactClick", () => {
-	it("should construct correct mailto URL", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("should construct correct mailto URL", async () => {
 		// Mock window.location
 		const mockLocation = { href: "" };
 		Object.defineProperty(window, "location", {
@@ -10,7 +21,7 @@ describe("handleContactClick", () => {
 			writable: true,
 		});
 
-		handleContactClick();
+		await handleContactClick();
 
 		expect(mockLocation.href).toContain("mailto:info@cloudfalcon.dev");
 		expect(mockLocation.href).toContain("subject=");
@@ -20,14 +31,14 @@ describe("handleContactClick", () => {
 		);
 	});
 
-	it("should URL encode special characters", () => {
+	it("should URL encode special characters", async () => {
 		const mockLocation = { href: "" };
 		Object.defineProperty(window, "location", {
 			value: mockLocation,
 			writable: true,
 		});
 
-		handleContactClick();
+		await handleContactClick();
 
 		// Check that the URL is properly encoded
 		expect(mockLocation.href).toContain("%20"); // Space encoding

@@ -16,6 +16,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  swcMinify: true,
   experimental: {
     optimizePackageImports: [
       "lucide-react",
@@ -23,6 +24,17 @@ const nextConfig = {
       "@radix-ui/react-accordion",
       "@radix-ui/react-dropdown-menu",
     ],
+  },
+  // Optimize production builds
+  productionBrowserSourceMaps: false,
+  // Reduce JavaScript bundle size
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"], // Keep error and warn in production for debugging
+          }
+        : false,
   },
   // PostHog reverse proxy configuration
   async rewrites() {
