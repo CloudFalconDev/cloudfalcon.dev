@@ -93,7 +93,7 @@ jobs:
 
       - name: Post Lighthouse Summary
         if: matrix.task == 'lighthouse'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             // core, github, and context are provided as globals by github-script action
