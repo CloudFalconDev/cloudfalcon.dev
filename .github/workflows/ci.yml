@@ -181,7 +181,7 @@ jobs:
       # Upload coverage for test task
       - name: Upload coverage
         if: matrix.task == 'test'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: ./coverage/lcov.info
           fail_ci_if_error: false
