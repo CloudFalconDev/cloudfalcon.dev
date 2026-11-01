@@ -2,7 +2,8 @@
 
 import posthog from "posthog-js";
 import { Component, type ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { button, container, textLink } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 
 interface ErrorBoundaryProps {
 	children: ReactNode;
@@ -56,44 +57,37 @@ export default class ErrorBoundary extends Component<
 			}
 
 			return (
-				<div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center">
-					<div className="max-w-md space-y-6">
-						<div className="space-y-2">
-							<h2 className="text-2xl font-bold text-slate-900 font-mono uppercase">
-								System Error
-							</h2>
-							<p className="text-slate-600 font-mono text-sm">
-								An unexpected error occurred. Please try again.
-							</p>
-						</div>
+				<div className={cn(container, "py-20 sm:py-28")}>
+					<p className="font-mono text-[12px] text-muted-foreground">Error</p>
+					<h2 className="mt-3 font-serif text-[2.4rem] leading-[1.08] tracking-[-0.02em] text-ink">
+						Something went wrong.
+					</h2>
+					<p className="mt-4 max-w-[36rem] text-[17px] leading-relaxed text-ink/80">
+						An unexpected error stopped this page from loading. Reloading
+						usually fixes it.
+					</p>
 
-						{process.env.NODE_ENV === "development" && this.state.error && (
-							<div className="p-4 bg-red-50 border border-red-200 rounded-lg text-left">
-								<p className="text-xs font-mono text-red-800 break-all">
-									{this.state.error.toString()}
-								</p>
-								{this.state.error.stack && (
-									<pre className="mt-2 text-xs font-mono text-red-600 overflow-auto max-h-40">
-										{this.state.error.stack}
-									</pre>
-								)}
-							</div>
-						)}
+					{process.env.NODE_ENV === "development" && this.state.error && (
+						<pre className="mt-6 max-h-60 max-w-3xl overflow-auto rounded-[3px] border border-line bg-[#f2f1ec] p-4 font-mono text-[12px] text-ink">
+							{this.state.error.stack ?? this.state.error.toString()}
+						</pre>
+					)}
 
-						<div className="flex gap-4 justify-center">
-							<Button
-								onClick={this.handleReset}
-								className="bg-blue-600 hover:bg-blue-700 text-white"
-							>
-								Try Again
-							</Button>
-							<Button
-								onClick={() => window.location.reload()}
-								variant="outline"
-							>
-								Reload Page
-							</Button>
-						</div>
+					<div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4">
+						<button
+							type="button"
+							onClick={() => window.location.reload()}
+							className={cn(button.primary, "h-10")}
+						>
+							Reload the page
+						</button>
+						<button
+							type="button"
+							onClick={this.handleReset}
+							className={cn(textLink, "text-[15px]")}
+						>
+							Try again
+						</button>
 					</div>
 				</div>
 			);

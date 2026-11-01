@@ -37,19 +37,3 @@ export const mockDocPage = {
 	description: "Test description",
 	content: [] as PortableTextBlock[],
 };
-
-// Mock Sanity client module
-export const mockSanityClient = () => {
-	vi.mock("@/lib/sanity", async () => {
-		const actual =
-			await vi.importActual<typeof import("@/lib/sanity")>("@/lib/sanity");
-		const { createMockSanityClient } = await import("./sanity");
-
-		const mockClient = createMockSanityClient();
-
-		return {
-			...actual,
-			client: mockClient as unknown as typeof actual.client,
-		};
-	});
-};

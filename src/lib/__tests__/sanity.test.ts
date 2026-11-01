@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { blogPostQuery, docPageQuery, urlFor } from "../sanity";
+import {
+	blogPostQuery,
+	docPageQuery,
+	rootDocPageQuery,
+	urlFor,
+} from "../sanity";
 
 describe("Sanity Client", () => {
 	it("should have urlFor function", () => {
@@ -17,5 +22,14 @@ describe("Sanity Client", () => {
 		expect(docPageQuery).toBeDefined();
 		expect(typeof docPageQuery).toBe("string");
 		expect(docPageQuery).toContain("docPage");
+	});
+
+	it("should keep body content out of the list queries", () => {
+		expect(blogPostQuery).not.toContain("content");
+		expect(docPageQuery).not.toMatch(/^\s*content,?$/m);
+	});
+
+	it("should find the docs home in one query", () => {
+		expect(rootDocPageQuery).toContain("$rootSlugs");
 	});
 });

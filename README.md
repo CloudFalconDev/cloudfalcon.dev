@@ -27,8 +27,8 @@ MCP (Model Context Protocol) servers are configured in `.cursor/mcp.json` for Cu
 Note: MCP environment variables are separate from Next.js environment variables and should be set in your system environment or MCP client configuration.
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 - Open [localhost:3000](http://localhost:3000)

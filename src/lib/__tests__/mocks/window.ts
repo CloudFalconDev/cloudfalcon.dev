@@ -25,9 +25,9 @@ export const mockWindowLocation = (href: string = "") => {
 	window.location = { href } as Location;
 };
 
-// Mock window.Calendly (for BookingTerminal tests)
+// Mock window.Calendly (popup widget used by src/lib/booking.ts)
 export const mockCalendly = () => {
-	(window as { Calendly?: unknown }).Calendly = {
-		initInlineWidget: vi.fn(),
+	window.Calendly = {
+		initPopupWidget: vi.fn(),
 	};
 };

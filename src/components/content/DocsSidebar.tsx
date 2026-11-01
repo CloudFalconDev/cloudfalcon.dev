@@ -1,158 +1,78 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import type { SidebarItem as SidebarItemType } from "@/lib/content";
+import type { DocsNavGroup } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
-function SidebarLink({
-	item,
-	pathname,
-}: {
-	item: SidebarItemType;
-	pathname: string;
-}) {
-	// Normalize paths for comparison (remove trailing slashes, handle empty)
-	const normalizePath = (path: string) => {
-		if (!path) return "/docs";
-		return path.replace(/\/$/, "") || "/docs";
-	};
-
-	const normalizedHref = normalizePath(item.href || "");
-	const normalizedPathname = normalizePath(pathname);
-	const isActive = normalizedPathname === normalizedHref;
-	// Use label directly from Sanity, don't transform it
-	const displayName = item.label || item.name || "Untitled";
-
-	// Ensure href is valid
-	const href = item.href && item.href !== "#" ? item.href : "/docs";
-
-	return (
-		<Link
-			href={href}
-			className={cn(
-				"block py-2 px-3 text-sm rounded-lg transition-colors",
-				isActive
-					? "bg-blue-50 text-blue-600 font-semibold border border-blue-100"
-					: "text-slate-600 hover:text-blue-600 hover:bg-slate-50",
-			)}
-		>
-			{displayName}
-		</Link>
-	);
+function normalize(path: string): string {
+	return path.replace(/\/+$/, "") || "/";
 }
 
-function SidebarCategory({
-	item,
-	pathname,
-}: {
-	item: SidebarItemType;
-	pathname: string;
-}) {
-	// Use label directly from Sanity, don't transform it
-	const displayName = item.label || item.name || "Category";
-	const children = item.children || [];
-
+function NavList({ nav, pathname }: { nav: DocsNavGroup[]; pathname: string }) {
 	return (
-		<div className="mb-6">
-			<h3 className="font-bold text-slate-900 mb-2 text-xs uppercase tracking-wider px-3">
-				{displayName}
-			</h3>
-			{children.length > 0 ? (
-				<ul className="space-y-1">
-					{children.map((child, index) => (
-						<li key={child.href || child.name || `child-${index}`}>
-							{child.type === "category" ? (
-								<SidebarCategory item={child} pathname={pathname} />
-							) : (
-								<SidebarLink item={child} pathname={pathname} />
-							)}
-						</li>
-					))}
-				</ul>
-			) : null}
+		<div className="space-y-7">
+			{nav.map((group) => (
+				<div key={group.id}>
+					{group.label && (
+						<p className="mb-2 text-[13px] font-semibold text-ink">
+							{group.label}
+						</p>
+					)}
+					<ul className="border-l border-line">
+						{group.items.map((item) => {
+							const active = normalize(item.href) === pathname;
+							return (
+								<li key={item.href}>
+									<Link
+										href={item.href}
+										aria-current={active ? "page" : undefined}
+										className={cn(
+											"-ml-px block border-l py-[5px] pl-4 text-[14px] leading-snug transition-colors",
+											active
+												? "border-ink font-medium text-ink"
+												: "border-transparent text-muted-foreground hover:border-ink/25 hover:text-ink",
+										)}
+									>
+										{item.label}
+									</Link>
+								</li>
+							);
+						})}
+					</ul>
+				</div>
+			))}
 		</div>
 	);
 }
 
-function SidebarContent({
-	structure,
-	pathname,
-}: {
-	structure: SidebarItemType[];
-	pathname: string;
-}) {
-	return (
-		<nav className="space-y-1 pr-2">
-			{structure.map((item) =>
-				item.type === "category" ? (
-					<SidebarCategory key={item.name} item={item} pathname={pathname} />
-				) : (
-					<SidebarLink
-						key={item.href || item.name}
-						item={item}
-						pathname={pathname}
-					/>
-				),
-			)}
-		</nav>
-	);
-}
-
-export default function DocsSidebar({
-	structure,
-}: {
-	structure: SidebarItemType[];
-}) {
-	const pathname = usePathname();
-	const [mobileOpen, setMobileOpen] = useState(false);
+/** Docs navigation: a sticky column on desktop, a disclosure on small screens. */
+export default function DocsSidebar({ nav }: { nav: DocsNavGroup[] }) {
+	const pathname = normalize(usePathname() ?? "/docs");
 
 	return (
 		<>
-			{/* Mobile Menu Button */}
-			<button
-				type="button"
-				onClick={() => setMobileOpen(true)}
-				className="md:hidden fixed bottom-6 right-6 z-50 p-4 bg-blue-600 text-white rounded-full shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center"
-				aria-label="Open navigation menu"
-			>
-				<Menu className="w-6 h-6" aria-hidden="true" />
-			</button>
-
-			{/* Mobile Sidebar Overlay */}
-			{mobileOpen && (
-				<>
-					<button
-						type="button"
-						className="md:hidden fixed inset-0 z-50 bg-black/50 cursor-default min-h-[48px]"
-						onClick={() => setMobileOpen(false)}
-						aria-label="Close navigation menu"
+			{/* Keyed by path so it closes after choosing a page */}
+			<details key={pathname} className="group border-b border-line lg:hidden">
+				<summary className="flex cursor-pointer list-none items-center justify-between py-3.5 text-[14.5px] text-ink [&::-webkit-details-marker]:hidden">
+					Browse the docs
+					<ChevronDown
+						className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180"
+						aria-hidden="true"
 					/>
-					<aside className="md:hidden fixed left-0 top-0 bottom-0 w-72 bg-white p-6 overflow-y-auto shadow-xl z-50 custom-scrollbar">
-						<div className="flex items-center justify-between mb-6">
-							<span className="font-bold text-slate-900 uppercase text-xs tracking-wider">
-								Documentation
-							</span>
-							<button
-								type="button"
-								onClick={() => setMobileOpen(false)}
-								className="p-3 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
-								aria-label="Close navigation menu"
-							>
-								<X className="w-5 h-5" aria-hidden="true" />
-							</button>
-						</div>
-						<SidebarContent structure={structure} pathname={pathname} />
-					</aside>
-				</>
-			)}
+				</summary>
+				<nav aria-label="Docs" className="pb-8 pt-3">
+					<NavList nav={nav} pathname={pathname} />
+				</nav>
+			</details>
 
-			{/* Desktop Sidebar */}
-			<aside className="w-64 pr-4 hidden md:block border-r border-slate-100 mr-8 overflow-y-auto max-h-[calc(100vh-120px)] sticky top-24 shrink-0 custom-scrollbar">
-				<SidebarContent structure={structure} pathname={pathname} />
-			</aside>
+			<nav
+				aria-label="Docs"
+				className="sticky top-16 hidden max-h-[calc(100vh-4rem)] self-start overflow-y-auto py-12 pr-2 [scrollbar-width:thin] lg:block"
+			>
+				<NavList nav={nav} pathname={pathname} />
+			</nav>
 		</>
 	);
 }

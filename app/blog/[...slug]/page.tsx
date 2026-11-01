@@ -1,99 +1,129 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import PortableText from "@/components/content/PortableText";
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
-import MainNav from "@/components/layout/MainNav";
-import { getBlogPost } from "@/lib/content";
-import { getPostHogClient } from "@/lib/posthog-server";
+import BookCallButton from "@/components/features/BookCallButton";
+import TrackView from "@/components/features/TrackView";
+import { firstParagraph, getAllBlogPosts, getBlogPost } from "@/lib/content";
+import { formatDate } from "@/lib/dates";
+import { button, container, docGrid, textLink } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 
-export async function generateMetadata(props: {
+interface PageProps {
 	params: Promise<{ slug: string[] }>;
-}): Promise<Metadata> {
-	const params = await props.params;
-	const post = await getBlogPost(params.slug);
+}
+
+// Generated at build time, refreshed in the background at most once a minute
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+	const posts = await getAllBlogPosts();
+	return posts.map((post) => ({ slug: post.slug }));
+}
+
+export async function generateMetadata({
+	params,
+}: PageProps): Promise<Metadata> {
+	const { slug } = await params;
+	const post = await getBlogPost(slug);
 
 	if (!post) {
 		return {
 			title: "Post Not Found | CloudFalcon Blog",
+			robots: { index: false, follow: false },
 		};
 	}
 
+	const url = `https://cloudfalcon.dev/blog/${post.slug.join("/")}`;
+	const description =
+		post.excerpt ||
+		firstParagraph(post.content) ||
+		"Technical notes from CloudFalcon";
+
 	return {
 		title: `${post.title} | CloudFalcon Blog`,
-		description: post.excerpt || "Technical insights from CloudFalcon",
+		description,
+		alternates: { canonical: url },
 		openGraph: {
 			title: post.title,
-			description: post.excerpt || "Technical insights from CloudFalcon",
+			description,
+			url,
 			type: "article",
 			publishedTime: post.date || undefined,
 		},
 		twitter: {
 			card: "summary_large_image",
 			title: post.title,
-			description: post.excerpt || "Technical insights from CloudFalcon",
+			description,
 		},
 	};
 }
 
-export default async function BlogPost(props: {
-	params: Promise<{ slug: string[] }>;
-}) {
-	const params = await props.params;
-	const post = await getBlogPost(params.slug);
+export default async function BlogPost({ params }: PageProps) {
+	const { slug } = await params;
+	const post = await getBlogPost(slug);
 
 	if (!post) {
-		return notFound();
-	}
-
-	// Track blog post view on server side
-	const posthog = getPostHogClient();
-	if (posthog) {
-		posthog.capture({
-			distinctId: "anonymous",
-			event: "blog_post_viewed",
-			properties: {
-				post_title: post.title,
-				post_slug: params.slug.join("/"),
-				post_date: post.date,
-				source: "blog_post_page",
-			},
-		});
+		notFound();
 	}
 
 	return (
-		<div className="flex flex-col min-h-screen">
-			<Header MainNavComponent={MainNav} />
-			<main className="flex-1 container mx-auto px-4 py-16 max-w-4xl">
-				<article className="prose lg:prose-xl mx-auto prose-slate">
-					<div className="flex flex-col gap-4 mb-12 pb-12 border-b border-slate-100">
-						<div className="flex items-center gap-3">
-							<span className="px-2 py-0.5 rounded bg-blue-50 text-blue-600 font-mono text-[10px] uppercase tracking-wider border border-blue-100">
-								Post_Type: Analysis
-							</span>
-							{post.date && (
-								<span className="text-slate-400 font-mono text-[10px] uppercase tracking-wider">
-									Timestamp:{" "}
-									{new Date(post.date)
-										.toLocaleDateString("en-US", {
-											year: "numeric",
-											month: "2-digit",
-											day: "2-digit",
-										})
-										.replace(/\//g, ".")}
-								</span>
-							)}
-						</div>
-						<h1 className="!mb-0 text-slate-900 !leading-tight">
-							{post.title}
-						</h1>
-					</div>
-					<div className="text-slate-600 leading-relaxed font-medium">
+		<article className={cn(container, "pb-24 pt-12 sm:pt-16")}>
+			<TrackView
+				event="blog_post_viewed"
+				properties={{
+					post_title: post.title,
+					post_slug: post.slug.join("/"),
+					post_date: post.date,
+					source: "blog_post_page",
+				}}
+			/>
+			<div className={docGrid}>
+				<div className="flex flex-wrap items-baseline gap-x-5 gap-y-1 font-mono text-[12.5px] text-muted-foreground lg:block lg:space-y-1.5 lg:pt-4">
+					<Link href="/blog" className="transition-colors hover:text-ink">
+						← All posts
+					</Link>
+					{post.date && (
+						<p>
+							<time dateTime={post.date}>{formatDate(post.date)}</time>
+						</p>
+					)}
+				</div>
+
+				<div className="min-w-0 max-w-[46rem]">
+					<h1 className="text-balance font-serif text-[2.4rem] leading-[1.08] tracking-[-0.02em] text-ink sm:text-[3.1rem]">
+						{post.title}
+					</h1>
+
+					<div className="prose mt-8 sm:mt-10">
 						<PortableText content={post.content} />
 					</div>
-				</article>
-			</main>
-			<Footer />
-		</div>
+
+					<aside
+						aria-label="Mentorship"
+						className="mt-16 border-t border-line pt-8"
+					>
+						<p className="font-serif text-[1.6rem] leading-snug tracking-[-0.01em] text-ink">
+							Learning this for a new role?
+						</p>
+						<p className="mt-2 max-w-[36rem] text-pretty text-[16px] leading-relaxed text-ink/75">
+							CloudFalcon runs one-to-one mentorship in cloud, DevOps and
+							platform engineering. The first 30-minute call is free.
+						</p>
+						<div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-4">
+							<BookCallButton
+								source="blog_post"
+								className={cn(button.primary, "h-10")}
+							>
+								Book a free call
+							</BookCallButton>
+							<Link href="/#pricing" className={cn(textLink, "text-[15px]")}>
+								See pricing
+							</Link>
+						</div>
+					</aside>
+				</div>
+			</div>
+		</article>
 	);
 }
