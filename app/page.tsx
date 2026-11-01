@@ -6,6 +6,7 @@ import Audience from "@/components/sections/Audience";
 import BookCall from "@/components/sections/BookCall";
 import Hero from "@/components/sections/Hero";
 import HowItWorks from "@/components/sections/HowItWorks";
+import Mentor from "@/components/sections/Mentor";
 import PricingSection from "@/components/sections/PricingSection";
 import Stack from "@/components/sections/Stack";
 import Tracks from "@/components/sections/Tracks";
@@ -21,6 +22,7 @@ export default function HomePage() {
 				<Stack />
 				<HowItWorks />
 				<Architecture />
+				<Mentor />
 				<PricingSection />
 				<BookCall />
 			</main>

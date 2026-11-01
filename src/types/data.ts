@@ -44,6 +44,18 @@ export interface Stat {
 	label: string;
 }
 
+// The mentor shown in the "Your mentor" section
+export interface Mentor {
+	name: string;
+	role: string;
+	location: string;
+	/** Optional headshot under /public, e.g. "/images/mentor.jpg" */
+	photo?: string;
+	bio: string[];
+	facts: Array<{ label: string; value: string }>;
+	links: Array<{ name: string; href: string }>;
+}
+
 // One block of the example roadmap
 export interface RoadmapItem {
 	weeks: string;

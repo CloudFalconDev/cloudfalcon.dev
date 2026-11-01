@@ -10,7 +10,7 @@ const contactLink =
 
 export default function BookCall() {
 	return (
-		<DocSection id="book" index="07" title="Get started">
+		<DocSection id="book" index="08" title="Get started">
 			<div>
 				<p className="text-balance font-serif text-[2.6rem] leading-[1.05] tracking-[-0.02em] text-ink sm:text-[3.4rem]">
 					The first call is free.
