@@ -21,9 +21,13 @@ export const revalidate = 60;
 
 export async function generateStaticParams() {
 	const nav = await getDocsNav();
-	return nav.flatMap((group) =>
+	const params = nav.flatMap((group) =>
 		group.items.map((item) => ({ slug: item.slug })),
 	);
+	// The nav keeps its Overview entry even when Sanity can't be reached (CI
+	// without secrets), and prerendering /docs would then fail the build. With
+	// no real docs, skip prerendering and render on the first request instead.
+	return params.some(({ slug }) => slug.length > 0) ? params : [];
 }
 
 export async function generateMetadata({
