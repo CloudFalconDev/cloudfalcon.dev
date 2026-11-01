@@ -5,10 +5,10 @@ Guidance for AI coding agents working with this repository.
 ## Quick Start
 
 ```bash
-npm install          # Install dependencies
-npm run dev          # Start dev server (http://localhost:3000)
-npm run check        # Lint + format + type check
-npm run build        # Production build
+pnpm install         # Install dependencies
+pnpm dev             # Start dev server (http://localhost:3000)
+pnpm check           # Lint + format + type check
+pnpm build           # Production build
 ```
 
 ## Tech Stack
@@ -29,7 +29,15 @@ npm run build        # Production build
 - **Schemas**: `schemas/blog.ts`, `schemas/doc.ts`
 - **Client**: `lib/sanity.ts` - Sanity client and queries
 - **Content loading**: `lib/content.ts` - Fetches from Sanity
-- **Rendering**: `components/content/PortableText.tsx` - Renders Sanity Portable Text
+- **Rendering**: `components/content/PortableText.tsx` - Renders Sanity Portable Text (server component)
+- **Static generation**: blog posts and docs pages use `generateStaticParams` + `revalidate = 60`,
+  so every page is prerendered at build time and refreshed in the background (ISR).
+  Don't add request-time APIs (cookies, headers, server-side analytics) to these pages;
+  record views in the browser with `TrackView` instead.
+- **Layouts**: `app/docs/layout.tsx` and `app/blog/layout.tsx` hold the header, footer and
+  docs sidebar, so navigation only swaps the page content
+- **Content quirks**: imported content stores links as objects inside span `marks`;
+  `normalizeMarks()` in `lib/content.ts` converts them, otherwise links render hidden
 
 ## Code Style
 
@@ -48,17 +56,21 @@ app/                    # Next.js pages (App Router)
   studio/               # Sanity Studio UI
 src/                    # Source code
   components/           # React components
-    layout/            # Layout components (Header, Footer, MainNav, ErrorBoundary)
-    content/           # Content rendering (PortableText, DocsSidebar)
-    sections/          # Landing page sections (Hero, Services, Platforms, etc.)
-    features/          # Feature components (BookingTerminal, CalendlyWidget)
-    background/       # Visual effects (GeometricBackground variants)
+    layout/            # Layout components (Header, Footer, MainNav, Logo, ErrorBoundary)
+    content/           # Content rendering (PortableText, ContentImage, DocsSidebar, StatusMessage)
+    sections/          # Landing page sections (Hero, then DocSection-based Audience, Tracks, Stack, HowItWorks, Pricing, BookCall)
+    features/          # Client islands (BookCallButton opens Calendly, TrackedLink/TrackView record PostHog events)
     ui/                # UI primitives (button, input, accordion, etc.)
   hooks/               # React hooks
     useIsMobile.ts     # Mobile detection hook
     usePrefersReducedMotion.ts  # Reduced motion preference hook
-  data/                # Static data (platforms, integrations, etc.)
+  data/                # Static page content (tracks, plans, audiences, steps, stack, roadmap, hero)
   lib/                 # Utilities
+    analytics.ts       # track(): lazy-loaded PostHog capture
+    booking.ts         # Calendly popup, script loaded on first click
+    contact.ts         # Contact email and prefilled mailto link
+    dates.ts           # UTC date formatting for posts and docs
+    styles.ts          # Shared class names (container, buttons)
     content.ts         # Content fetching from Sanity
     sanity.ts          # Sanity client & queries
   schemas/             # Sanity schemas (blog, doc, category)
@@ -76,12 +88,12 @@ src/                    # Source code
 ## Common Commands
 
 ```bash
-npm run dev              # Development server
-npm run build            # Production build
-npm run check            # Lint + format + type check
-npm run test             # Run tests
-npm run test:ui         # Run tests with UI
-npm run test:coverage   # Run tests with coverage report
+pnpm dev                 # Development server
+pnpm build               # Production build
+pnpm check               # Lint + format + type check
+pnpm test                # Run tests
+pnpm test:ui            # Run tests with UI
+pnpm test:coverage      # Run tests with coverage report
 ```
 
 ## Testing
@@ -118,10 +130,10 @@ describe("Button", () => {
 
 GitHub Actions runs on push/PR:
 
-1. `npm ci` - Install dependencies
-2. `npm run lint` - Biome linting
-3. `npm run build` - Production build
-4. `npm run test` - Run tests with coverage
+1. `pnpm install --frozen-lockfile` - Install dependencies
+2. `pnpm lint` - Biome linting
+3. `pnpm build` - Production build
+4. `pnpm test` - Run tests with coverage
 5. Lighthouse CI - Performance audits (automated in CI)
 
 ## Analytics & Monitoring
@@ -159,28 +171,29 @@ Configured in `next.config.mjs` with `rewrites()`.
 
 Custom events are tracked throughout the application:
 
-- `booking_terminal_opened` - User opens booking terminal
-- `booking_terminal_closed` - User closes booking terminal
-- `contact_connect_clicked` - User clicks contact button
-- `pricing_tier_contact_clicked` - User clicks pricing tier contact
-- `phone_call_initiated` - User clicks phone number
+- `booking_terminal_opened` - User opens the Calendly booking popup (name kept from the old booking terminal so dashboards keep working; `source` says which button)
+- `contact_connect_clicked` - User clicks the contact email
+- `pricing_tier_contact_clicked` - User starts booking from a pricing plan, or emails about team mentorship
 - `social_link_clicked` - User clicks social media link
-- `blog_post_viewed` - User views blog post
+- `blog_post_viewed` - User views blog post (sent from the browser by `TrackView`)
 - `error_boundary_triggered` - Error caught by ErrorBoundary
 - `docs_error_occurred` - Error in docs page
 - `blog_error_occurred` - Error in blog post
-- `not_found_page_viewed` - 404 page viewed
+- `not_found_page_viewed` - 404 page viewed (sent from the browser by `TrackView`)
 
 **Usage**:
 
 ```typescript
-// Client-side (in components)
-import posthog from "posthog-js";
+// Client-side (in client components); PostHog is imported lazily
+import { track } from "@/lib/analytics";
 
-posthog.capture("event_name", {
+void track("event_name", {
   property1: "value1",
   property2: "value2",
 });
+
+// For links, prefer the TrackedLink component
+// <TrackedLink href="..." event="event_name" properties={{ ... }}>...</TrackedLink>
 
 // Server-side (in server components/API routes)
 import { getPostHogClient } from "@/lib/posthog-server";

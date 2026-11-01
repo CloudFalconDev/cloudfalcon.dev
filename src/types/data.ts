@@ -3,79 +3,49 @@
  * Centralized type definitions for better type safety
  */
 
-// Service Details
-export interface ServiceDetail {
-	icon: React.ReactNode;
+// Who the mentorship is for
+export interface Audience {
 	title: string;
 	description: string;
-	stats: {
-		value: string;
-		label: string;
-	};
-	features: Array<{
-		icon: React.ReactNode;
-		text: string;
-	}>;
-	gradient: string;
 }
 
-// Platform
-export interface Platform {
-	name: string;
-	href: string;
-	logo: string;
-	alt: string;
+// Mentorship topic (areas a mentee can focus on)
+export interface MentorshipTrack {
+	title: string;
 	description: string;
+	focus: string;
 }
 
-// Integration
-export interface Integration {
-	name: string;
-	href: string;
-	logo: string;
-	alt: string;
-	description: string;
-}
-
-// IaC Tool
-export interface IaCTool {
-	name: string;
-	image: string;
-	description: string;
-	link: string;
-}
-
-// Kubernetes Tool
-export interface KubernetesTool {
-	name: string;
-	description: string;
-	icon: React.ReactNode;
-	link: string;
-	logo: string;
-}
-
-// Terraform Tool
-export interface TerraformTool {
-	name: string;
-	description: string;
-	icon: React.ReactNode;
-	link: string;
-	logo: string;
-}
-
-// Security Tool
-export interface SecurityTool {
-	name: string;
-	description: string;
-	icon: React.ReactNode;
-	link: string;
-	logo: string;
-}
-
-// Pipeline Step
-export interface PipelineStep {
+// Mentorship Plan (pricing row)
+export interface MentorshipPlan {
 	id: string;
-	tool: string;
+	name: string;
+	price: string;
+	billing: string;
+	includes: string;
+}
+
+// A step in how a mentorship runs
+export interface MentorshipStep {
+	title: string;
 	description: string;
-	img: string;
+	tools: Array<{ name: string; logo?: string }>;
+}
+
+// Group of tools in the stack section
+export interface StackGroup {
+	name: string;
+	items: string[];
+}
+
+// Track-record facts shown next to the hero
+export interface Stat {
+	value: string;
+	label: string;
+}
+
+// One block of the example roadmap
+export interface RoadmapItem {
+	weeks: string;
+	title: string;
 }

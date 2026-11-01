@@ -1,69 +1,115 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Footer from "@/components/layout/Footer";
-import Header from "@/components/layout/Header";
-import MainNav from "@/components/layout/MainNav";
-import { getAllBlogPosts } from "@/lib/content";
+import { type BlogPostSummary, getAllBlogPosts } from "@/lib/content";
+import { formatShortDate, yearOf } from "@/lib/dates";
+import { container, docGrid } from "@/lib/styles";
+import { cn } from "@/lib/utils";
+
+const description =
+	"Tutorials, talks and notes on AWS, Terraform, Kubernetes and DevOps from CloudFalcon.";
 
 export const metadata: Metadata = {
-	title: "Blog | CloudFalcon - Technical Intelligence",
-	description:
-		"Technical insights, cloud engineering tutorials, and DevOps best practices from the CloudFalcon team. Explore IaC, Kubernetes, AWS, and more.",
+	title: "Blog | CloudFalcon",
+	description,
+	alternates: { canonical: "https://cloudfalcon.dev/blog" },
 	openGraph: {
-		title: "Blog | CloudFalcon - Technical Intelligence",
-		description:
-			"Technical insights, cloud engineering tutorials, and DevOps best practices from the CloudFalcon team.",
+		title: "Blog | CloudFalcon",
+		description,
+		url: "https://cloudfalcon.dev/blog",
 		type: "website",
 	},
 };
 
+export const revalidate = 60;
+
+function groupByYear(posts: BlogPostSummary[]) {
+	const years = new Map<string, BlogPostSummary[]>();
+	for (const post of posts) {
+		const year = post.date ? String(yearOf(post.date)) : "Undated";
+		years.set(year, [...(years.get(year) ?? []), post]);
+	}
+	return [...years.entries()];
+}
+
+const comparable = (text: string) =>
+	text.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// Many imported excerpts just repeat the title (or its slug); skip those
+function hasOwnExcerpt(post: BlogPostSummary): boolean {
+	return (
+		post.excerpt.trim() !== "" &&
+		comparable(post.excerpt) !== comparable(post.title)
+	);
+}
+
 export default async function BlogIndex() {
 	const posts = await getAllBlogPosts();
+	const years = groupByYear(posts);
 
 	return (
-		<div className="flex flex-col min-h-screen">
-			<Header MainNavComponent={MainNav} />
-			<main className="flex-1 container mx-auto px-4 py-20 max-w-6xl">
-				<div className="flex flex-col items-center mb-20">
-					<span className="text-blue-600 font-mono text-sm mb-4 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 shadow-sm">
-						logs.tail_recent()
-					</span>
-					<h1 className="text-4xl font-bold text-slate-900 text-center font-mono uppercase tracking-tight">
-						Technical Intelligence
-					</h1>
-				</div>
+		<>
+			<header className={cn(container, "pb-14 pt-16 sm:pb-20 sm:pt-24")}>
+				<h1 className="font-serif text-[2.9rem] leading-[1.02] tracking-[-0.025em] text-ink sm:text-[4.4rem]">
+					Blog
+				</h1>
+				<p className="mt-6 max-w-[36rem] text-pretty text-[19px] leading-[1.6] text-ink/80">
+					Tutorials, talks and notes on AWS, Terraform, Kubernetes and DevOps.
+				</p>
+			</header>
 
-				<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-					{posts.map((post, idx) => (
-						<Link
-							key={post.slug.join("/")}
-							href={`/blog/${post.slug.join("/")}`}
-							className="block group h-full"
-						>
-							<div className="border border-slate-100 rounded-3xl p-10 hover:shadow-2xl transition-all bg-white h-full flex flex-col shadow-sm relative overflow-hidden group/card">
-								<div className="absolute top-4 right-6 font-mono text-[8px] text-slate-300">
-									REF_0x0{idx + 1}
-								</div>
-								<h2 className="text-xl font-bold mb-3 text-slate-900 group-hover:text-blue-600 transition-colors font-mono tracking-tight">
-									{post.title}
-								</h2>
-								{post.date && (
-									<p className="text-sm text-slate-500 mb-6">
-										{new Date(post.date).toLocaleDateString()}
-									</p>
-								)}
-								<p className="text-slate-600 flex-1 line-clamp-3 text-sm leading-relaxed">
-									{post.excerpt}
-								</p>
-								<span className="text-blue-600 font-semibold mt-6 inline-flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-									Read more &rarr;
-								</span>
-							</div>
-						</Link>
-					))}
+			{years.length === 0 ? (
+				<div className={cn(container, "border-t border-line py-16")}>
+					<p className="text-[16px] text-muted-foreground">
+						No posts yet. Check back soon.
+					</p>
 				</div>
-			</main>
-			<Footer />
-		</div>
+			) : (
+				years.map(([year, yearPosts]) => (
+					<section
+						key={year}
+						aria-labelledby={`year-${year}`}
+						className="border-t border-line"
+					>
+						<div className={cn(container, docGrid, "py-10 sm:py-12")}>
+							<h2
+								id={`year-${year}`}
+								className="font-mono text-[13px] text-muted-foreground lg:pt-[3px]"
+							>
+								{year}
+							</h2>
+							<ol className="-my-3">
+								{yearPosts.map((post) => (
+									<li key={post.slug.join("/")}>
+										<Link
+											href={`/blog/${post.slug.join("/")}`}
+											className="group grid gap-x-8 gap-y-1 py-3 sm:grid-cols-[minmax(0,1fr)_5.5rem]"
+										>
+											<span className="min-w-0">
+												<span className="text-pretty text-[16.5px] font-medium leading-snug text-ink transition-colors group-hover:text-brand">
+													{post.title}
+												</span>
+												{hasOwnExcerpt(post) && (
+													<span className="mt-1 line-clamp-2 block text-pretty text-[15px] leading-relaxed text-muted-foreground">
+														{post.excerpt}
+													</span>
+												)}
+											</span>
+											{post.date && (
+												<time
+													dateTime={post.date}
+													className="row-start-1 font-mono text-[12.5px] text-muted-foreground sm:col-start-2 sm:pt-[3px] sm:text-right"
+												>
+													{formatShortDate(post.date)}
+												</time>
+											)}
+										</Link>
+									</li>
+								))}
+							</ol>
+						</div>
+					</section>
+				))
+			)}
+		</>
 	);
 }

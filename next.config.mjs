@@ -16,11 +16,9 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   experimental: {
     optimizePackageImports: [
       "lucide-react",
-      "framer-motion",
       "@radix-ui/react-accordion",
       "@radix-ui/react-dropdown-menu",
     ],

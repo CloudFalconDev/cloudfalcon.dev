@@ -1,15 +1,17 @@
-"use client";
-
-import { PortableText as PortableTextComponent } from "@portabletext/react";
+import {
+	PortableText as PortableTextComponent,
+	type PortableTextComponents,
+} from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
 import Image from "next/image";
+import Link from "next/link";
 import { urlFor } from "@/lib/sanity";
+import ContentImage from "./ContentImage";
 
 // Extract YouTube video ID from various URL formats
 function getYouTubeVideoId(url: string): string | null {
 	if (!url) return null;
 
-	// Match various YouTube URL formats
 	const patterns = [
 		/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
 		/youtube\.com\/watch\?.*v=([^&\n?#]+)/,
@@ -25,153 +27,115 @@ function getYouTubeVideoId(url: string): string | null {
 	return null;
 }
 
-// YouTube embed component
+function resolveImageUrl(url: string): string {
+	if (url.startsWith("http") || url.startsWith("/")) return url;
+	return `/${url}`;
+}
+
+/**
+ * Docs were imported from Docusaurus, where pages link to each other by file
+ * ("../devops/tools.md"). Docs URLs mirror those paths, so dropping the
+ * extension makes the relative link resolve to the right page.
+ */
+function withoutMarkdownExtension(href: string): string {
+	if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return href;
+	return href.replace(/\.mdx?(?=$|[#?])/, "");
+}
+
 function YouTubeEmbed({ url }: { url: string }) {
 	const videoId = getYouTubeVideoId(url);
 
 	if (!videoId) {
-		if (process.env.NODE_ENV === "development") {
-			console.warn("Invalid YouTube URL:", url);
-		}
 		return (
-			<div className="my-8 p-4 bg-red-50 border border-red-200 rounded-lg">
-				<p className="text-red-600 text-sm">Invalid YouTube URL: {url}</p>
-			</div>
+			<p>
+				<a href={url} target="_blank" rel="noopener noreferrer">
+					Watch the video
+				</a>
+			</p>
 		);
 	}
 
-	const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-
 	return (
-		<div className="my-8 aspect-video rounded-lg overflow-hidden bg-slate-100 shadow-lg">
+		<div className="not-prose my-8 aspect-video overflow-hidden rounded-[3px] border border-line bg-ink/5">
 			<iframe
-				src={embedUrl}
+				src={`https://www.youtube.com/embed/${videoId}`}
 				title="YouTube video player"
 				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 				allowFullScreen
-				className="w-full h-full"
+				className="h-full w-full"
 				loading="lazy"
 			/>
 		</div>
 	);
 }
 
-interface PortableTextProps {
-	content: PortableTextBlock[];
-}
-
-const components = {
+const components: PortableTextComponents = {
+	block: {
+		// The page title is the only h1; headings inside the body start at h2
+		h1: ({ children }) => <h2>{children}</h2>,
+	},
 	types: {
 		image: ({
 			value,
 		}: {
-			value: {
-				asset?: { _ref: string };
-				alt?: string;
-				url?: string;
-			};
+			value: { asset?: { _ref: string }; alt?: string; url?: string };
 		}) => {
-			// If URL is provided, use it (external image)
 			if (value?.url) {
-				const imageUrl = value.url.startsWith("http")
-					? value.url
-					: value.url.startsWith("/")
-						? value.url
-						: `/${value.url}`;
-
 				return (
-					<div className="my-8">
-						<img
-							src={imageUrl}
-							alt={value.alt || "Image"}
-							className="rounded-lg max-w-full h-auto"
-							loading="lazy"
-							decoding="async"
-							fetchPriority="low"
-							onError={(e) => {
-								if (process.env.NODE_ENV === "development") {
-									console.error("Failed to load image:", imageUrl);
-								}
-								e.currentTarget.style.display = "none";
-							}}
-						/>
-					</div>
+					<ContentImage
+						src={resolveImageUrl(value.url)}
+						alt={value.alt || ""}
+					/>
 				);
 			}
-
-			// Handle Sanity asset references
 			if (!value?.asset?._ref) {
 				return null;
 			}
-			const imageUrl = urlFor(value).width(800).height(600).url();
 			return (
-				<div className="my-8">
+				<figure className="my-8">
 					<Image
-						src={imageUrl}
-						alt={value.alt || "Image"}
-						width={800}
-						height={600}
-						className="rounded-lg"
+						src={urlFor(value).width(1200).auto("format").url()}
+						alt={value.alt || ""}
+						width={1200}
+						height={800}
+						sizes="(min-width: 1024px) 44rem, 100vw"
+						className="h-auto w-full rounded-[3px] border border-line bg-white"
 					/>
-				</div>
+				</figure>
 			);
 		},
-		externalImage: ({
-			value,
-		}: {
-			value: {
-				url: string;
-				alt?: string;
-			};
-		}) => {
+		externalImage: ({ value }: { value: { url?: string; alt?: string } }) => {
 			if (!value?.url) {
-				if (process.env.NODE_ENV === "development") {
-					console.warn("externalImage missing url:", value);
-				}
 				return null;
 			}
-			// Handle both absolute URLs and relative paths
-			const imageUrl = value.url.startsWith("http")
-				? value.url
-				: value.url.startsWith("/")
-					? value.url
-					: `/${value.url}`;
-
-			// For local images, use regular img tag
 			return (
-				<div className="my-8">
-					<img
-						src={imageUrl}
-						alt={value.alt || "Image"}
-						className="rounded-lg max-w-full h-auto"
-						loading="lazy"
-						decoding="async"
-						fetchPriority="low"
-						onError={(e) => {
-							console.error("Failed to load image:", imageUrl);
-							e.currentTarget.style.display = "none";
-						}}
-					/>
-				</div>
+				<ContentImage src={resolveImageUrl(value.url)} alt={value.alt || ""} />
 			);
 		},
 		code: ({
 			value,
 		}: {
-			value: { code: string; language?: string; filename?: string };
+			value: { code?: string; language?: string; filename?: string };
 		}) => {
+			const label =
+				value.filename ||
+				(value.language && value.language !== "text" ? value.language : null);
 			return (
-				<pre className="bg-slate-100 p-4 rounded-lg overflow-x-auto my-4 border border-slate-200">
-					<code className={`language-${value.language || "text"}`}>
-						{value.code}
-					</code>
-					{value.filename && (
-						<div className="text-xs text-slate-500 mt-2">{value.filename}</div>
+				<figure className="not-prose my-6 overflow-hidden rounded-[3px] border border-line bg-[#f2f1ec]">
+					{label && (
+						<figcaption className="border-b border-line px-4 py-2 font-mono text-[12px] text-muted-foreground">
+							{label}
+						</figcaption>
 					)}
-				</pre>
+					<pre className="overflow-x-auto p-4 font-mono text-[13.5px] leading-[1.65] text-ink">
+						<code className={`language-${value.language || "text"}`}>
+							{value.code}
+						</code>
+					</pre>
+				</figure>
 			);
 		},
-		youtubeVideo: ({ value }: { value: { url: string } }) => {
+		youtubeVideo: ({ value }: { value: { url?: string } }) => {
 			if (!value?.url) {
 				return null;
 			}
@@ -179,22 +143,19 @@ const components = {
 		},
 	},
 	marks: {
-		link: ({
-			children,
-			value,
-		}: {
-			children: React.ReactNode;
-			value?: { href?: string };
-		}) => {
-			if (!value?.href) {
+		link: ({ children, value }) => {
+			const href: string | undefined = value?.href;
+			if (!href) {
 				return <>{children}</>;
 			}
-			const isExternal =
-				value.href.startsWith("http://") || value.href.startsWith("https://");
+			// Internal links use the router so they open instantly
+			if (href.startsWith("/") && !href.startsWith("//")) {
+				return <Link href={href}>{children}</Link>;
+			}
+			const isExternal = /^https?:\/\//.test(href);
 			return (
 				<a
-					href={value.href}
-					className="text-blue-600 hover:underline"
+					href={isExternal ? href : withoutMarkdownExtension(href)}
 					{...(isExternal && {
 						target: "_blank",
 						rel: "noopener noreferrer",
@@ -207,6 +168,10 @@ const components = {
 	},
 };
 
-export default function PortableText({ content }: PortableTextProps) {
+export default function PortableText({
+	content,
+}: {
+	content: PortableTextBlock[];
+}) {
 	return <PortableTextComponent value={content} components={components} />;
 }

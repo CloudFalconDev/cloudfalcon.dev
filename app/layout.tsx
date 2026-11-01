@@ -1,26 +1,48 @@
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from "next/font/google";
 
 import ErrorBoundary from "@/components/layout/ErrorBoundary";
 import "./globals.css";
 
+const plexSans = IBM_Plex_Sans({
+	subsets: ["latin"],
+	weight: ["400", "500", "600"],
+	variable: "--font-plex-sans",
+	display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+	subsets: ["latin"],
+	weight: ["400", "500"],
+	variable: "--font-plex-mono",
+	display: "swap",
+});
+
+const newsreader = Newsreader({
+	subsets: ["latin"],
+	variable: "--font-newsreader",
+	display: "swap",
+	axes: ["opsz"],
+});
+
 export const metadata: Metadata = {
-	title: "CloudFalcon | Cloud Automation, Security, and IaC Experts",
+	title: "CloudFalcon | Cloud & DevOps Mentorship",
 	description:
-		"CloudFalcon orchestrates production-grade automation, hardens security postures, refactors cost structures, and bootstraps engineering teams via technical deep-dives.",
+		"1:1 mentorship in cloud, DevOps and platform engineering: break into cloud, level up to senior, prepare for AWS, CKA and Terraform certifications, and ace FAANG interviews.",
 	keywords: [
-		"cloud automation",
-		"infrastructure as code",
-		"IaC",
+		"cloud mentorship",
+		"DevOps mentor",
+		"platform engineering mentorship",
+		"career switch to cloud",
+		"AWS certification prep",
+		"CKA",
 		"Terraform",
 		"Kubernetes",
-		"AWS",
-		"Azure",
-		"GCP",
-		"DevOps",
-		"cloud security",
-		"FinOps",
-		"cloud consulting",
+		"infrastructure as code",
+		"FAANG interview prep",
+		"system design interview",
+		"SRE",
 	],
 	authors: [{ name: "CloudFalcon" }],
 	creator: "CloudFalcon",
@@ -30,23 +52,23 @@ export const metadata: Metadata = {
 		locale: "en_US",
 		url: "https://cloudfalcon.dev",
 		siteName: "CloudFalcon",
-		title: "CloudFalcon | Cloud Automation, Security, and IaC Experts",
+		title: "CloudFalcon | Cloud & DevOps Mentorship",
 		description:
-			"Orchestrating production-grade automation, security hardening, cost optimization, and engineering deep-dives at global scale.",
+			"1:1 mentorship in cloud, DevOps and platform engineering. From your first deploy to FAANG interviews.",
 		images: [
 			{
 				url: "/og-image.png",
 				width: 1200,
 				height: 630,
-				alt: "CloudFalcon - Cloud Orchestration Experts",
+				alt: "CloudFalcon - Cloud & DevOps Mentorship",
 			},
 		],
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "CloudFalcon | Cloud Automation, Security, and IaC Experts",
+		title: "CloudFalcon | Cloud & DevOps Mentorship",
 		description:
-			"Orchestrating production-grade automation, security hardening, cost optimization, and engineering deep-dives at global scale.",
+			"1:1 mentorship in cloud, DevOps and platform engineering. From your first deploy to FAANG interviews.",
 		images: ["/og-image.png"],
 		creator: "@cloudfalcon",
 	},
@@ -80,7 +102,10 @@ export default function RootLayout({
 	}
 
 	return (
-		<html lang="en">
+		<html
+			lang="en"
+			className={`${plexSans.variable} ${plexMono.variable} ${newsreader.variable}`}
+		>
 			<head>
 				{/* DNS prefetch for external resources */}
 				<link rel="dns-prefetch" href="https://assets.calendly.com" />

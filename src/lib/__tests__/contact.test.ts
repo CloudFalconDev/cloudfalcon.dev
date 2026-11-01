@@ -1,46 +1,17 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { handleContactClick } from "../contact";
+import { describe, expect, it } from "vitest";
+import { CONTACT_EMAIL, contactMailto } from "../contact";
 
-// Mock posthog-js module
-vi.mock("posthog-js", () => ({
-	default: {
-		capture: vi.fn(),
-	},
-}));
-
-describe("handleContactClick", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("should construct correct mailto URL", async () => {
-		// Mock window.location
-		const mockLocation = { href: "" };
-		Object.defineProperty(window, "location", {
-			value: mockLocation,
-			writable: true,
-		});
-
-		await handleContactClick();
-
-		expect(mockLocation.href).toContain("mailto:info@cloudfalcon.dev");
-		expect(mockLocation.href).toContain("subject=");
-		expect(mockLocation.href).toContain("body=");
-		expect(mockLocation.href).toContain(
-			encodeURIComponent("CloudFalcon Dev Services Inquiry"),
+describe("contactMailto", () => {
+	it("targets the contact address with subject and body", () => {
+		expect(contactMailto.startsWith(`mailto:${CONTACT_EMAIL}?`)).toBe(true);
+		expect(contactMailto).toContain(
+			`subject=${encodeURIComponent("CloudFalcon Mentorship Inquiry")}`,
 		);
+		expect(contactMailto).toContain("&body=");
 	});
 
-	it("should URL encode special characters", async () => {
-		const mockLocation = { href: "" };
-		Object.defineProperty(window, "location", {
-			value: mockLocation,
-			writable: true,
-		});
-
-		await handleContactClick();
-
-		// Check that the URL is properly encoded
-		expect(mockLocation.href).toContain("%20"); // Space encoding
+	it("URL-encodes special characters", () => {
+		expect(contactMailto).toContain("%20");
+		expect(contactMailto).not.toMatch(/subject=[^&]* /);
 	});
 });

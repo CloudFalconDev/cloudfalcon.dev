@@ -1,10 +1,12 @@
 import type { PortableTextBlock } from "@portabletext/types";
+import { cache } from "react";
 import {
 	blogPostBySlugQuery,
 	blogPostQuery,
 	client,
 	docPageBySlugQuery,
 	docPageQuery,
+	rootDocPageQuery,
 } from "./sanity";
 
 // --- Types ---
@@ -17,74 +19,218 @@ export interface BlogPost {
 	content: PortableTextBlock[];
 }
 
+export type BlogPostSummary = Omit<BlogPost, "content">;
+
 export interface DocPage {
 	slug: string[];
 	title: string;
+	description: string | null;
+	updatedAt: string | null;
 	content: PortableTextBlock[];
-	frontMatter: Record<string, unknown>;
 }
 
-export interface SidebarItem {
-	type: "category" | "doc";
-	name: string;
-	label?: string;
-	href?: string;
-	position?: number;
-	children?: SidebarItem[];
+export interface DocsNavItem {
+	slug: string[];
+	href: string;
+	label: string;
+}
+
+export interface DocsNavGroup {
+	/** Anchor id, used by the docs index and breadcrumbs */
+	id: string;
+	/** null for the top group (overview and single-segment docs) */
+	label: string | null;
+	items: DocsNavItem[];
 }
 
 interface SanityBlogPost {
 	_id: string;
 	title: string;
 	slug: string;
-	date: string;
-	excerpt?: string;
-	content: PortableTextBlock[];
-}
-
-interface SanityCategory {
-	_id: string;
-	name: string;
-	slug: string;
-	sidebarPosition?: number;
+	date: string | null;
+	excerpt?: string | null;
+	content?: PortableTextBlock[] | null;
 }
 
 interface SanityDocPage {
 	_id: string;
+	_updatedAt?: string;
 	title: string;
-	slug: string;
-	category?: SanityCategory | null;
-	sidebarPosition?: number;
-	sidebarLabel?: string;
-	description?: string;
-	content: PortableTextBlock[];
+	slug: string | null;
+	description?: string | null;
+	content?: PortableTextBlock[] | null;
 }
 
-// --- Blog Logic ---
+export interface SanityDocNavEntry {
+	slug: string | null;
+	title: string;
+	sidebarLabel?: string | null;
+	sidebarPosition?: number | null;
+	heading?: string | null;
+	category?: {
+		name?: string | null;
+		slug?: string | null;
+		sidebarPosition?: number | null;
+	} | null;
+}
 
-export async function getAllBlogPosts(): Promise<BlogPost[]> {
+/** Slugs that mean "the docs home page" */
+const ROOT_DOC_SLUGS = ["", "intro", "index", "docs"];
+
+// --- Helpers ---
+
+function toSegments(slug: string | null | undefined): string[] {
+	return (slug ?? "").split("/").filter(Boolean);
+}
+
+function blockText(block: PortableTextBlock): string {
+	return (block.children ?? [])
+		.map((child) =>
+			"text" in child && typeof child.text === "string" ? child.text : "",
+		)
+		.join("");
+}
+
+function isTextBlock(block: PortableTextBlock): boolean {
+	return block._type === "block";
+}
+
+function isEmptyBlock(block: PortableTextBlock): boolean {
+	if (!isTextBlock(block) || block.listItem) return false;
+	const children = block.children ?? [];
+	return (
+		children.every((child) => child._type === "span") &&
+		blockText(block).trim() === ""
+	);
+}
+
+/**
+ * The imported content stores links as objects inside each span's `marks`
+ * ({ _type: "link", href }) instead of as keys into the block's `markDefs`.
+ * Portable Text renderers can't read that shape and hide the text entirely,
+ * so move those objects into `markDefs` and reference them by key.
+ */
+export function normalizeMarks(
+	content: PortableTextBlock[],
+): PortableTextBlock[] {
+	return content.map((block) => {
+		const children = block.children ?? [];
+		const hasInlineMarks = children.some(
+			(child) =>
+				Array.isArray(child.marks) &&
+				child.marks.some((mark: unknown) => typeof mark !== "string"),
+		);
+		if (!isTextBlock(block) || !hasInlineMarks) {
+			return block;
+		}
+
+		const markDefs = [...(block.markDefs ?? [])];
+		const normalized = children.map((child, childIndex) => {
+			if (!Array.isArray(child.marks)) {
+				return child;
+			}
+			const marks = (child.marks as unknown[]).flatMap((mark, markIndex) => {
+				if (typeof mark === "string") return [mark];
+				if (mark && typeof mark === "object" && "_type" in mark) {
+					const definition = mark as { _type: string; _key?: string };
+					const key =
+						definition._key ??
+						`${block._key ?? "block"}-${childIndex}-${markIndex}`;
+					markDefs.push({ ...definition, _key: key });
+					return [key];
+				}
+				return [];
+			});
+			return {
+				...child,
+				text: typeof child.text === "string" ? child.text : "",
+				marks,
+			};
+		});
+
+		return { ...block, markDefs, children: normalized };
+	});
+}
+
+/**
+ * Most docs open with an h1 that repeats (and usually improves on) the title.
+ * Use it as the page heading and drop it from the body, and skip empty paragraphs.
+ */
+export function splitLeadingHeading(content: PortableTextBlock[]): {
+	heading: string | null;
+	body: PortableTextBlock[];
+} {
+	const blocks = content.filter((block) => !isEmptyBlock(block));
+	const [first, ...rest] = blocks;
+	if (first && isTextBlock(first) && first.style === "h1") {
+		const heading = blockText(first).trim();
+		if (heading) {
+			return { heading, body: rest };
+		}
+	}
+	return { heading: null, body: blocks };
+}
+
+const KNOWN_WORDS: Record<string, string> = {
+	aws: "AWS",
+	devops: "DevOps",
+	macos: "macOS",
+	mkdocs: "MkDocs",
+	ossf: "OSSF",
+	vscode: "VS Code",
+	iac: "IaC",
+};
+
+/** "container_registries" -> "Container registries", "aws" -> "AWS" */
+export function humanizeSegment(segment: string): string {
+	return segment
+		.split(/[-_\s]+/)
+		.filter(Boolean)
+		.map((word, index) => {
+			const known = KNOWN_WORDS[word.toLowerCase()];
+			if (known) return known;
+			return index === 0 ? word[0].toUpperCase() + word.slice(1) : word;
+		})
+		.join(" ");
+}
+
+function byPositionThenLabel(
+	a: { position?: number | null; label: string },
+	b: { position?: number | null; label: string },
+): number {
+	const aHas = typeof a.position === "number";
+	const bHas = typeof b.position === "number";
+	if (aHas && bHas && a.position !== b.position) {
+		return (a.position as number) - (b.position as number);
+	}
+	if (aHas !== bHas) return aHas ? -1 : 1;
+	return a.label.localeCompare(b.label);
+}
+
+// --- Blog ---
+
+export const getAllBlogPosts = cache(async (): Promise<BlogPostSummary[]> => {
 	try {
-		const posts = (await client.fetch<SanityBlogPost[]>(blogPostQuery)) || [];
+		const posts = (await client.fetch<SanityBlogPost[]>(blogPostQuery)) ?? [];
 
 		return posts.map((post) => ({
-			slug: post.slug.split("/").filter(Boolean),
+			slug: toSegments(post.slug),
 			title: post.title,
 			date: post.date || null,
 			excerpt: post.excerpt || "",
-			content: [], // content not needed for list view
 		}));
 	} catch (e) {
 		console.error("Error fetching blog posts from Sanity:", e);
 		return [];
 	}
-}
+});
 
-export async function getBlogPost(slug: string[]): Promise<BlogPost | null> {
-	try {
-		const slugString = slug.join("/");
+// Keyed by a string so generateMetadata and the page share one request
+const getBlogPostBySlug = cache(
+	async (slug: string): Promise<BlogPost | null> => {
 		const post = await client.fetch<SanityBlogPost | null>(
 			blogPostBySlugQuery,
-			{ slug: slugString },
+			{ slug },
 		);
 
 		if (!post) {
@@ -92,286 +238,158 @@ export async function getBlogPost(slug: string[]): Promise<BlogPost | null> {
 		}
 
 		return {
-			slug,
+			slug: toSegments(post.slug),
 			title: post.title,
 			date: post.date || null,
 			excerpt: post.excerpt || "",
-			content: post.content || [],
+			content: normalizeMarks(post.content ?? []).filter(
+				(block) => !isEmptyBlock(block),
+			),
 		};
-	} catch (e) {
-		console.error("Error fetching blog post from Sanity:", e);
-		return null;
-	}
+	},
+);
+
+/**
+ * Throws on network errors (instead of returning null) so a failed background
+ * revalidation keeps serving the last good page rather than caching a 404.
+ */
+export async function getBlogPost(slug: string[]): Promise<BlogPost | null> {
+	return getBlogPostBySlug(slug.join("/"));
 }
 
-// --- Docs Logic ---
+// --- Docs ---
 
-export async function getDocPage(slug?: string[]): Promise<DocPage | null> {
-	try {
-		// Handle root /docs case
-		const isRoot = !slug || slug.length === 0;
-
-		if (isRoot) {
-			// For root page, try multiple common slug values
-			const rootSlugOptions = ["", "intro", "index", "docs"];
-			let doc: SanityDocPage | null = null;
-
-			for (const rootSlug of rootSlugOptions) {
-				doc = await client.fetch<SanityDocPage | null>(docPageBySlugQuery, {
-					slug: rootSlug,
+const getDocPageBySlug = cache(
+	async (slug: string): Promise<DocPage | null> => {
+		const doc = slug
+			? await client.fetch<SanityDocPage | null>(docPageBySlugQuery, { slug })
+			: await client.fetch<SanityDocPage | null>(rootDocPageQuery, {
+					rootSlugs: ROOT_DOC_SLUGS,
 				});
-				if (doc) {
-					if (process.env.NODE_ENV === "development") {
-						console.log(`Found root doc with slug: "${rootSlug}"`);
-					}
-					break;
-				}
-			}
-
-			// If still not found, try a broader query for root page
-			if (!doc) {
-				doc = await client.fetch<SanityDocPage | null>(
-					`*[_type == "docPage" && (!defined(slug.current) || slug.current == "" || slug.current == null || slug.current == "intro" || slug.current == "index" || slug.current == "docs")] | order(_createdAt asc) [0]`,
-				);
-			}
-
-			if (!doc) {
-				// Log available docs for debugging
-				if (process.env.NODE_ENV === "development") {
-					console.error(
-						"Root docs page not found. To fix: In Sanity Studio, edit a doc page and set its slug to empty (clear the field), 'intro', 'index', or 'docs'",
-					);
-				}
-				return null;
-			}
-
-			return {
-				slug: [],
-				title: doc.title,
-				content: doc.content || [],
-				frontMatter: {
-					description: doc.description,
-					category: doc.category?.name || null,
-					categorySlug: doc.category?.slug || null,
-					sidebarPosition: doc.sidebarPosition,
-					sidebarLabel: doc.sidebarLabel,
-				},
-			};
-		}
-
-		// For non-root pages, use the provided slug
-		const slugString = slug.join("/");
-		let doc = await client.fetch<SanityDocPage | null>(docPageBySlugQuery, {
-			slug: slugString,
-		});
-
-		// Try alternative formats if not found
-		if (!doc) {
-			const altSlug = slugString.replace(/\/$/, "");
-			if (altSlug !== slugString) {
-				doc = await client.fetch<SanityDocPage | null>(docPageBySlugQuery, {
-					slug: altSlug,
-				});
-			}
-		}
 
 		if (!doc) {
 			return null;
 		}
 
-		// Always use the actual slug from Sanity, not the requested one
-		const actualSlug = doc.slug ? doc.slug.split("/").filter(Boolean) : [];
+		const { heading, body } = splitLeadingHeading(
+			normalizeMarks(doc.content ?? []),
+		);
 
 		return {
-			slug: actualSlug,
-			title: doc.title,
-			content: doc.content || [],
-			frontMatter: {
-				description: doc.description,
-				category: doc.category?.name || null,
-				categorySlug: doc.category?.slug || null,
-				sidebarPosition: doc.sidebarPosition,
-				sidebarLabel: doc.sidebarLabel,
-			},
+			slug: slug ? toSegments(doc.slug) : [],
+			title: heading ?? doc.title,
+			description: doc.description?.trim() || null,
+			updatedAt: doc._updatedAt ?? null,
+			content: body,
 		};
-	} catch (e) {
-		console.error("Error fetching doc page from Sanity:", e);
-		return null;
-	}
+	},
+);
+
+/** Same error behaviour as getBlogPost. */
+export async function getDocPage(slug: string[] = []): Promise<DocPage | null> {
+	return getDocPageBySlug(slug.join("/"));
 }
 
-// Recursive Sidebar Builder
-export async function getDocsStructure(): Promise<SidebarItem[]> {
-	try {
-		const docs = (await client.fetch<SanityDocPage[]>(docPageQuery)) || [];
+/** Group docs by their first slug segment, e.g. "aws/aws-vault" -> AWS. */
+export function buildDocsNav(docs: SanityDocNavEntry[]): DocsNavGroup[] {
+	const top: DocsNavGroup = {
+		id: "overview",
+		label: null,
+		items: [{ slug: [], href: "/docs", label: "Overview" }],
+	};
+	const topEntries: (DocsNavItem & { position?: number | null })[] = [];
+	const groups = new Map<
+		string,
+		{
+			key: string;
+			label: string;
+			position?: number | null;
+			entries: (DocsNavItem & { position?: number | null })[];
+		}
+	>();
 
-		if (!docs || docs.length === 0) {
-			return [];
+	for (const doc of docs) {
+		const segments = toSegments(doc.slug);
+		if (segments.length === 0 || ROOT_DOC_SLUGS.includes(segments.join("/"))) {
+			continue;
 		}
 
-		// Build a tree structure based on slug paths
-		// Use a more robust approach that handles any slug structure
-		const tree = new Map<string, SidebarItem>();
-		const categoryLabels = new Map<string, string>(); // Store custom category labels
+		const label =
+			doc.sidebarLabel?.trim() ||
+			doc.heading?.trim() ||
+			doc.title ||
+			"Untitled";
+		const entry = {
+			slug: segments,
+			href: `/docs/${segments.join("/")}`,
+			label,
+			position: doc.sidebarPosition,
+		};
 
-		// First pass: collect category labels from docs that have them
-		// Always use the category name from Sanity, matching by slug
-		for (const doc of docs) {
-			if (doc.category?.name && doc.category?.slug) {
-				const slugParts = doc.slug.split("/").filter(Boolean);
-				if (slugParts.length > 0) {
-					const categoryPath = slugParts.slice(0, -1);
-					if (categoryPath.length > 0) {
-						const categoryKey = categoryPath.join("/");
-						const lastPart = categoryPath[categoryPath.length - 1];
-						// Match by slug (case-insensitive) or if not set yet
-						if (
-							doc.category.slug.toLowerCase() === lastPart.toLowerCase() ||
-							!categoryLabels.has(categoryKey)
-						) {
-							categoryLabels.set(categoryKey, doc.category.name);
-						}
-					}
-				}
-			}
+		if (segments.length === 1) {
+			topEntries.push(entry);
+			continue;
 		}
 
-		// Helper to get or create a category node
-		function getOrCreateCategory(
-			path: string[],
-			fullPath: string,
-		): SidebarItem {
-			const key = fullPath;
-			const existing = tree.get(key);
-			if (existing) {
-				return existing;
-			}
-
-			// Use custom label if available, otherwise use the last part of path
-			const categoryName = path[path.length - 1];
-			const customLabel = categoryLabels.get(fullPath);
-			const category: SidebarItem = {
-				type: "category",
-				name: categoryName,
-				label: customLabel || categoryName,
-				children: [],
-				position: undefined,
-			};
-
-			tree.set(key, category);
-			return category;
+		const key = segments[0];
+		let group = groups.get(key);
+		if (!group) {
+			group = { key, label: humanizeSegment(key), entries: [] };
+			groups.set(key, group);
 		}
-
-		// Process each document - always use current slug from Sanity
-		for (const doc of docs) {
-			// Skip invalid docs
-			if (!doc.slug || !doc.title) {
-				continue;
-			}
-
-			const slugParts = doc.slug.split("/").filter(Boolean);
-			const isRoot =
-				doc.slug === "" || (slugParts.length === 1 && slugParts[0] === "intro");
-
-			if (isRoot) {
-				// Skip root intro in sidebar
-				continue;
-			}
-
-			// Always build href from current slug - this ensures it's always correct
-			// Use sidebarLabel if it exists and is not empty, otherwise fall back to title
-			const displayLabel =
-				doc.sidebarLabel && doc.sidebarLabel.trim() !== ""
-					? doc.sidebarLabel
-					: doc.title;
-			const item: SidebarItem = {
-				type: "doc",
-				name: slugParts[slugParts.length - 1] || doc.slug,
-				label: displayLabel,
-				href: `/docs/${doc.slug}`, // Always use current slug
-				position: doc.sidebarPosition,
-			};
-
-			if (slugParts.length === 1) {
-				// Root level doc
-				const key = slugParts[0];
-				// Only add if not already exists (avoid duplicates)
-				if (!tree.has(key)) {
-					tree.set(key, item);
-				} else {
-					// Update existing item if it's a category (shouldn't happen, but be safe)
-					const existing = tree.get(key);
-					if (existing && existing.type === "doc") {
-						tree.set(key, item);
-					}
-				}
-			} else {
-				// Nested doc - build category structure recursively
-				const categoryPath = slugParts.slice(0, -1);
-				const categoryKey = categoryPath.join("/");
-				const category = getOrCreateCategory(categoryPath, categoryKey);
-
-				// Always update category label if doc has a category field
-				// Match by slug (case-insensitive) to ensure correct category name
-				if (doc.category?.name && doc.category?.slug) {
-					const lastPart = categoryPath[categoryPath.length - 1];
-					// Match by slug (case-insensitive) - if it matches, use category name
-					if (doc.category.slug.toLowerCase() === lastPart.toLowerCase()) {
-						category.label = doc.category.name;
-						categoryLabels.set(categoryKey, doc.category.name);
-					}
-				}
-
-				// Also check if we already have a label for this category from first pass
-				// and update it if not set
-				if (!category.label || category.label === category.name) {
-					const existingLabel = categoryLabels.get(categoryKey);
-					if (existingLabel) {
-						category.label = existingLabel;
-					}
-				}
-
-				category.children = category.children || [];
-				// Check for duplicates before adding
-				const existingIndex = category.children.findIndex(
-					(child) => child.href === item.href,
-				);
-				if (existingIndex >= 0) {
-					// Update existing item
-					category.children[existingIndex] = item;
-				} else {
-					category.children.push(item);
-				}
-			}
+		// A category whose slug matches the folder names the group
+		if (
+			doc.category?.name &&
+			doc.category.slug?.toLowerCase() === key.toLowerCase()
+		) {
+			group.label = doc.category.name;
+			group.position = doc.category.sidebarPosition;
 		}
-
-		// Convert tree to array and sort
-		const structure: SidebarItem[] = Array.from(tree.values());
-
-		// Sort categories and their children
-		function sortItems(items: SidebarItem[]): SidebarItem[] {
-			return items
-				.map((item) => {
-					if (item.children && item.children.length > 0) {
-						item.children = sortItems(item.children);
-					}
-					return item;
-				})
-				.sort((a, b) => {
-					// Items with position come first
-					if (a.position !== undefined && b.position !== undefined) {
-						return a.position - b.position;
-					}
-					if (a.position !== undefined) return -1;
-					if (b.position !== undefined) return 1;
-					// Fall back to alphabetical
-					return (a.label || a.name).localeCompare(b.label || b.name);
-				});
-		}
-
-		return sortItems(structure);
-	} catch (e) {
-		console.error("Error fetching docs structure from Sanity:", e);
-		return [];
+		group.entries.push(entry);
 	}
+
+	const strip = ({
+		position: _position,
+		...item
+	}: DocsNavItem & { position?: number | null }) => item;
+
+	top.items.push(...topEntries.sort(byPositionThenLabel).map(strip));
+
+	const sections = [...groups.values()]
+		.sort(byPositionThenLabel)
+		.map((group) => ({
+			id: group.key.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+			label: group.label,
+			items: group.entries.sort(byPositionThenLabel).map(strip),
+		}));
+
+	return [top, ...sections];
+}
+
+export const getDocsNav = cache(async (): Promise<DocsNavGroup[]> => {
+	try {
+		const docs = (await client.fetch<SanityDocNavEntry[]>(docPageQuery)) ?? [];
+		return buildDocsNav(docs);
+	} catch (e) {
+		console.error("Error fetching docs navigation from Sanity:", e);
+		return buildDocsNav([]);
+	}
+});
+
+/** First real paragraph of a body, trimmed to a meta-description length. */
+export function firstParagraph(
+	content: PortableTextBlock[],
+	maxLength = 160,
+): string | null {
+	for (const block of content) {
+		if (!isTextBlock(block) || (block.style && block.style !== "normal")) {
+			continue;
+		}
+		const text = blockText(block).replace(/\s+/g, " ").trim();
+		if (text.length < 40) continue;
+		if (text.length <= maxLength) return text;
+		const cut = text.slice(0, maxLength - 1);
+		return `${cut.slice(0, cut.lastIndexOf(" "))}…`;
+	}
+	return null;
 }

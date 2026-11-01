@@ -1,23 +1,10 @@
-// PostHog loaded dynamically to avoid blocking initial render
-export async function handleContactClick() {
-	// Track contact connect click event (lazy load PostHog)
-	try {
-		const posthog = (await import("posthog-js")).default;
-		posthog.capture("contact_connect_clicked", {
-			method: "email",
-			recipient: "info@cloudfalcon.dev",
-			source: "contact_button",
-		});
-	} catch (error) {
-		// PostHog not available, fail silently
-		if (process.env.NODE_ENV === "development") {
-			console.warn("PostHog not available:", error);
-		}
-	}
+export const CONTACT_EMAIL = "info@cloudfalcon.dev";
 
-	const subject = "CloudFalcon Dev Services Inquiry";
-	const body = "I'm interested in learning more about your services.";
-	window.location.href = `mailto:info@cloudfalcon.dev?subject=${encodeURIComponent(
-		subject,
-	)}&body=${encodeURIComponent(body)}`;
-}
+const subject = "CloudFalcon Mentorship Inquiry";
+const body =
+	"I'm interested in mentorship. A bit about me and what I want to achieve:";
+
+/** Prefilled mailto link for mentorship inquiries. */
+export const contactMailto = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+	subject,
+)}&body=${encodeURIComponent(body)}`;

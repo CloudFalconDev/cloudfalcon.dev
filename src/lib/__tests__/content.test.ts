@@ -1,9 +1,15 @@
+import type { PortableTextBlock } from "@portabletext/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+	buildDocsNav,
+	firstParagraph,
 	getAllBlogPosts,
 	getBlogPost,
 	getDocPage,
-	getDocsStructure,
+	getDocsNav,
+	humanizeSegment,
+	normalizeMarks,
+	splitLeadingHeading,
 } from "../content";
 import { client } from "../sanity";
 import { mockBlogPost, mockDocPage } from "./mocks/sanity";
@@ -17,7 +23,22 @@ vi.mock("../sanity", () => ({
 	blogPostBySlugQuery: "*[_type == 'blogPost' && slug.current == $slug][0]",
 	docPageQuery: "*[_type == 'docPage']",
 	docPageBySlugQuery: "*[_type == 'docPage' && slug.current == $slug][0]",
+	rootDocPageQuery: "*[_type == 'docPage' && !defined(slug.current)][0]",
 }));
+
+function block(
+	text: string,
+	style = "normal",
+	key = text || "empty",
+): PortableTextBlock {
+	return {
+		_type: "block",
+		_key: key,
+		style,
+		markDefs: [],
+		children: [{ _type: "span", _key: `${key}-span`, text, marks: [] }],
+	};
+}
 
 describe("Content Functions", () => {
 	beforeEach(() => {
@@ -117,24 +138,43 @@ describe("Content Functions", () => {
 
 			const result = await getDocPage(["test-doc"]);
 
-			expect(client.fetch).toHaveBeenCalled();
+			expect(client.fetch).toHaveBeenCalledTimes(1);
 			expect(result).toBeDefined();
 			expect(result?.slug).toEqual(["test-doc"]);
 			expect(result?.title).toBe("Test Doc Page");
+			expect(result?.description).toBe("Test description");
 		});
 
-		it("should handle root docs page", async () => {
+		it("should load the root docs page with a single query", async () => {
 			const mockDoc = {
 				...mockDocPage,
-				slug: "",
+				slug: null,
 			};
 
 			vi.mocked(client.fetch).mockResolvedValue(mockDoc);
 
 			const result = await getDocPage([]);
 
-			expect(result).toBeDefined();
+			expect(client.fetch).toHaveBeenCalledTimes(1);
+			expect(vi.mocked(client.fetch).mock.calls[0][1]).toEqual({
+				rootSlugs: ["", "intro", "index", "docs"],
+			});
 			expect(result?.slug).toEqual([]);
+		});
+
+		it("should use the opening h1 as the title and drop it from the body", async () => {
+			vi.mocked(client.fetch).mockResolvedValue({
+				...mockDocPage,
+				slug: "terraform/links",
+				title: "links",
+				content: [block("Links", "h1"), block(""), block("First paragraph")],
+			});
+
+			const result = await getDocPage(["terraform", "links"]);
+
+			expect(result?.title).toBe("Links");
+			expect(result?.content).toHaveLength(1);
+			expect(result?.content[0]._key).toBe("First paragraph");
 		});
 
 		it("should return null when doc not found", async () => {
@@ -144,58 +184,135 @@ describe("Content Functions", () => {
 
 			expect(result).toBeNull();
 		});
-	});
 
-	describe("getDocsStructure", () => {
-		it("should build sidebar structure from docs", async () => {
-			const mockDocs = [
-				{
-					...mockDocPage,
-					slug: "getting-started",
-					title: "Getting Started",
-					category: {
-						name: "Introduction",
-						slug: "introduction",
-						sidebarPosition: 1,
-					},
-					sidebarPosition: 1,
-				},
-				{
-					...mockDocPage,
-					slug: "advanced",
-					title: "Advanced",
-					category: {
-						name: "Guides",
-						slug: "guides",
-						sidebarPosition: 2,
-					},
-					sidebarPosition: 1,
-				},
-			];
-
-			vi.mocked(client.fetch).mockResolvedValue(mockDocs);
-
-			const result = await getDocsStructure();
-
-			expect(client.fetch).toHaveBeenCalled();
-			expect(result).toBeDefined();
-			expect(Array.isArray(result)).toBe(true);
-		});
-
-		it("should return empty array when no docs found", async () => {
-			vi.mocked(client.fetch).mockResolvedValue([]);
-
-			const result = await getDocsStructure();
-
-			expect(result).toEqual([]);
-		});
-
-		it("should handle errors gracefully", async () => {
+		it("should rethrow fetch errors so a cached page is kept", async () => {
 			vi.mocked(client.fetch).mockRejectedValue(new Error("Fetch failed"));
 
-			const result = await getDocsStructure();
-			// Functions catch errors and return empty array
-			expect(result).toEqual([]);
+			await expect(getDocPage(["failing-doc"])).rejects.toThrow("Fetch failed");
+		});
+	});
+
+	describe("getDocsNav", () => {
+		it("should group docs by their first slug segment", async () => {
+			vi.mocked(client.fetch).mockResolvedValue([
+				{ slug: null, title: "Documentation", heading: "OpenWiki" },
+				{
+					slug: "aws/aws-vault",
+					title: "aws-vault",
+					sidebarLabel: "aws-vault",
+					category: { name: "AWS", slug: "aws" },
+				},
+				{
+					slug: "aws/aws-multi-account",
+					title: "AWS Multi Account Setup",
+					sidebarPosition: 1,
+				},
+				{
+					slug: "container_registries/harbor",
+					title: "Harbor Registry",
+					heading: "Harbor",
+				},
+				{
+					slug: "devops/iacmk/makefile/terraform",
+					title: "terraform",
+					heading: "Makefile Examples",
+				},
+			]);
+
+			const result = await getDocsNav();
+
+			expect(client.fetch).toHaveBeenCalledTimes(1);
+			expect(result.map((group) => group.label)).toEqual([
+				null,
+				"AWS",
+				"Container registries",
+				"DevOps",
+			]);
+			// Overview first, root doc not repeated
+			expect(result[0].items).toEqual([
+				{ slug: [], href: "/docs", label: "Overview" },
+			]);
+			// Positioned docs first, then alphabetical
+			expect(result[1].items.map((item) => item.label)).toEqual([
+				"AWS Multi Account Setup",
+				"aws-vault",
+			]);
+			expect(result[2].items[0]).toEqual({
+				slug: ["container_registries", "harbor"],
+				href: "/docs/container_registries/harbor",
+				label: "Harbor",
+			});
+			expect(result[2].id).toBe("container-registries");
+			expect(result[3].items[0].href).toBe(
+				"/docs/devops/iacmk/makefile/terraform",
+			);
+		});
+
+		it("should still return the overview when there are no docs", () => {
+			expect(buildDocsNav([])).toEqual([
+				{
+					id: "overview",
+					label: null,
+					items: [{ slug: [], href: "/docs", label: "Overview" }],
+				},
+			]);
+		});
+	});
+
+	describe("helpers", () => {
+		it("humanizeSegment should keep known acronyms", () => {
+			expect(humanizeSegment("aws")).toBe("AWS");
+			expect(humanizeSegment("keyboard-shortcuts")).toBe("Keyboard shortcuts");
+			expect(humanizeSegment("macos")).toBe("macOS");
+		});
+
+		it("normalizeMarks should turn inline link objects into markDefs", () => {
+			const imported = {
+				_type: "block",
+				_key: "b1",
+				style: "normal",
+				children: [
+					{ _type: "span", _key: "s1", text: "See ", marks: [] },
+					{
+						_type: "span",
+						_key: "s2",
+						text: "Terraform",
+						marks: [{ _type: "link", href: "https://www.terraform.io/" }],
+					},
+				],
+			} as unknown as PortableTextBlock;
+
+			const [result] = normalizeMarks([imported]);
+
+			expect(result.markDefs).toEqual([
+				{ _type: "link", href: "https://www.terraform.io/", _key: "b1-1-0" },
+			]);
+			expect(result.children?.[1]).toMatchObject({
+				text: "Terraform",
+				marks: ["b1-1-0"],
+			});
+			// Blocks that are already well-formed are returned untouched
+			const clean = block("Plain text");
+			expect(normalizeMarks([clean])[0]).toBe(clean);
+		});
+
+		it("splitLeadingHeading should leave bodies without an h1 alone", () => {
+			const content = [block("Intro paragraph")];
+			expect(splitLeadingHeading(content)).toEqual({
+				heading: null,
+				body: content,
+			});
+		});
+
+		it("firstParagraph should skip headings and short lines", () => {
+			const long = "A ".repeat(120).trim();
+			const result = firstParagraph([
+				block("Title", "h2"),
+				block("Short"),
+				block(long),
+			]);
+			expect(result?.endsWith("…")).toBe(true);
+			expect(result?.length).toBeLessThanOrEqual(160);
 		});
 	});
 });
