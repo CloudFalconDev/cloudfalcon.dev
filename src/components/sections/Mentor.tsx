@@ -50,7 +50,23 @@ export default function Mentor() {
 				))}
 			</dl>
 
-			<ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+			<h3 className="mt-10 text-[16px] font-semibold text-ink">
+				From his Upwork reviews
+			</h3>
+			<div className="mt-4 space-y-6">
+				{mentor.reviews.map((review) => (
+					<figure key={review.project} className="border-l-2 border-line pl-5">
+						<blockquote className="max-w-[40rem] text-pretty font-serif text-[18px] leading-relaxed text-ink">
+							“{review.quote}”
+						</blockquote>
+						<figcaption className="mt-2 text-[14px] text-muted-foreground">
+							Five-star review · {review.project}, {review.year}
+						</figcaption>
+					</figure>
+				))}
+			</div>
+
+			<ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
 				{mentor.links.map((link) => (
 					<li key={link.name}>
 						<TrackedLink
