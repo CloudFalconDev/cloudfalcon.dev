@@ -53,6 +53,8 @@ export interface Mentor {
 	photo?: string;
 	bio: string[];
 	facts: Array<{ label: string; value: string }>;
+	/** Client reviews, quoted word for word from Upwork */
+	reviews: Array<{ quote: string; project: string; year: number }>;
 	links: Array<{ name: string; href: string }>;
 }
 

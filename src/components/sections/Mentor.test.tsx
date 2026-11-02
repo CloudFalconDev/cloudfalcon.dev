@@ -17,6 +17,19 @@ describe("Mentor", () => {
 		).toBeInTheDocument();
 	});
 
+	it("quotes client reviews with the project they were for", () => {
+		render(<Mentor />);
+
+		const quotes = screen.getAllByRole("blockquote");
+		expect(quotes).toHaveLength(mentor.reviews.length);
+		for (const review of mentor.reviews) {
+			expect(screen.getByText(`“${review.quote}”`)).toBeInTheDocument();
+			expect(
+				screen.getByText(new RegExp(`${review.project}, ${review.year}`)),
+			).toBeInTheDocument();
+		}
+	});
+
 	it("opens the mentor's profiles in a new tab", () => {
 		render(<Mentor />);
 
