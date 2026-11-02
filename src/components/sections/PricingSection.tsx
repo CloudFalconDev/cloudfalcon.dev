@@ -11,7 +11,7 @@ const rowClass =
 
 export default function PricingSection() {
 	return (
-		<DocSection id="pricing" index="06" title="Pricing">
+		<DocSection id="pricing" index="07" title="Pricing">
 			<p className="max-w-[40rem] text-pretty font-serif text-[1.6rem] leading-snug text-ink">
 				Every plan starts with a free 30-minute call.
 			</p>
